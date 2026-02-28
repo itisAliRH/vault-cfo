@@ -17,12 +17,15 @@ dist/
 
 # misc
 .DS_Store
+# Never commit env files with secrets (use .env.local.example as template only)
 .env
 .env.local
 .env.*.local
 .env.development.local
 .env.test.local
 .env.production.local
+.env.development
+.env.production
 
 # logs
 npm-debug.log*
@@ -57,9 +60,12 @@ pnpm-lock.yaml
 *.temp
 *.bak
 
-# AI agent files
+# AI agent and planning (no sensitive or planning data in repo)
 .agent
 .agents
 .claude
 .vibe
+.cursor/
+*.plan.md
+plans/
 skills-lock.json
