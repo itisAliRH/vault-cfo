@@ -1,36 +1,85 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# VaultCFO — Private AI CFO
 
-## Getting Started
+A privacy-first personal finance assistant: encrypted local vault, expense dashboard, contract analyzer, and an AI agent that uses Mistral Small 3.2 via the Mistral API (or any compatible endpoint). Built for the **NVIDIA On-Device** track.
 
-First, run the development server:
+## Architecture
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│  Next.js 16 App (App Router, src/)                                       │
+├─────────────────────────────────────────────────────────────────────────┤
+│  UI: Dashboard | Contracts | Insights | Agent Chat | Settings            │
+│  Pixel theme (Press Start 2P, retro palette), shadcn/ui, Recharts        │
+├─────────────────────────────────────────────────────────────────────────┤
+│  API Routes                                                              │
+│  /api/onboarding  /api/transactions  /api/contracts  /api/insights      │
+│  /api/chat        /api/vault         /api/health/perf  /api/voice/tts   │
+├─────────────────────────────────────────────────────────────────────────┤
+│  Lib: encryption (AES-256-GCM) | db (SQLite, better-sqlite3)             │
+│  Ingest: csv (papaparse), pdf (pdf-parse), contract-extract (LLM)       │
+│  Analytics: budget, spikes, subscriptions, simulator                    │
+│  Agent: models (Mistral Small 3.2), tools (getUserProfile, listTransactions…)  │
+├─────────────────────────────────────────────────────────────────────────┤
+│  Data: ./data/vault.db (encrypted sensitive fields)                      │
+│  Inference: Mistral API (OpenAI-compatible), optional ElevenLabs TTS    │
+└─────────────────────────────────────────────────────────────────────────┘
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- **Vault:** SQLite at `./data/vault.db`; sensitive fields (amounts, merchant, contract text) encrypted with AES-256-GCM; key from `ENCRYPTION_PASSPHRASE`.
+- **Agent:** Vercel AI SDK `streamText` with tool calling; fast model (8B) for chat, reasoning model (14B) for contract extraction; max 5 tool steps; guardrails in system prompt.
+- **Performance:** `/api/health/perf` pings the Mistral backend, returns model name, latency, backend label, VRAM (when returned by the provider); cached 30s; shown in Settings and sidebar.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Run locally
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. **Clone and install**
+   ```bash
+   cd vaultcfo && pnpm install
+   ```
 
-## Learn More
+2. **Environment**
+   ```bash
+   cp .env.local.example .env.local
+   ```
+   Set:
+   - `ENCRYPTION_PASSPHRASE` — used to encrypt vault data (pick a strong passphrase).
+   - `MISTRAL_API_KEY` — for Mistral inference (chat + contract extraction). Without it, chat and contract parsing will fail.
+   - Optional: `MISTRAL_API_URL` — override the default `https://api.mistral.ai/v1` (e.g. `http://localhost:8000/v1` for a local/OpenAI-compatible deployment).
+   - Optional: `ELEVENLABS_API_KEY` for TTS (Settings / voice mic tooltip).
 
-To learn more about Next.js, take a look at the following resources:
+3. **Dev server**
+   ```bash
+   pnpm dev
+   ```
+   Open [http://localhost:3000](http://localhost:3000). First visit → onboarding; then Dashboard.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+4. **Demo data**
+   On the Dashboard, click **Load Demo Data** to import sample transactions (CSV) and two sample contracts (text). Then try the Agent Chat (e.g. “How can I save 200€/month?”) and check Contracts and Insights.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Run with Docker
 
-## Deploy on Vercel
+- Build and run the app with your Mistral (or compatible) endpoint reachable:
+- Use the included **Dockerfile** for a container that runs Next.js standalone and keeps `./data` for the DB:
+  ```bash
+  docker build -t vaultcfo . && docker run -p 3000:3000 -v vaultcfo-data:/app/data \
+    -e ENCRYPTION_PASSPHRASE=xxx \
+    -e MISTRAL_API_KEY=xxx \
+    -e MISTRAL_API_URL=https://api.mistral.ai/v1 \
+    vaultcfo
+  ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Track: NVIDIA On-Device
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Inference:** Mistral Small 3.2 via the Mistral API (or any OpenAI-compatible deployment).
+- **Efficiency:** Single small model for both chat/tools and contract fact extraction to keep the demo simple.
+- **Observability:** Performance panel in Settings and sidebar: model name, latency, backend label, VRAM (when returned by the provider).
+
+## Scripts
+
+- `pnpm dev` — development
+- `pnpm build` — production build
+- `pnpm start` — run production server
+- `pnpm lint` — ESLint
+
+## License
+
+MIT.
