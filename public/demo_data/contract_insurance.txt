@@ -1,0 +1,22 @@
+INSURANCE PLUS — HOME & AUTO POLICY
+
+Policyholder: Demo User
+Policy number: IP-2024-789012
+Effective date: 2024-03-15
+
+MONTHLY PREMIUM: 45.00 EUR
+Billing cycle: Monthly on the 10th of each month.
+
+RENEWAL: This contract renews automatically on 2025-03-15 (annual renewal date).
+Notice period: 30 days before renewal. To cancel, written notice must be received by 2025-02-13.
+Cancellation deadline: 2025-02-13. After this date the contract renews for one year.
+
+Early termination: If you cancel before the end of the initial term, a penalty of 120 EUR applies.
+Penalty: 120 EUR for early termination (before renewal date).
+
+Key clauses:
+- Automatic renewal unless cancelled in writing 30 days before renewal date.
+- Premium may be adjusted at renewal based on claims history.
+- Coverage includes liability, comprehensive, and roadside assistance.
+
+Contact: support@insuranceplus.demo

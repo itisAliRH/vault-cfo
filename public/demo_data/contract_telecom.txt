@@ -1,0 +1,22 @@
+TELECOM FRANCE — MOBILE & BROADBAND
+
+Customer: Demo User
+Contract reference: TF-2024-456789
+Start date: 2024-06-01
+
+MONTHLY FEE: 65.00 EUR
+Includes: Unlimited mobile + 1 Gbps fibre. Billed monthly on the 11th.
+
+RENEWAL DATE: 2025-06-01 (12-month contract).
+Notice period: 60 days. To cancel without penalty, notify us by 2025-04-02.
+Cancellation deadline: 2025-04-02. After this date you are committed for another 12 months.
+
+Early exit fee: 180 EUR if you leave before the end of the minimum term.
+Penalty amount: 180 EUR. Description: Early termination fee (remaining months × 15 EUR, max 180 EUR).
+
+Key clauses:
+- Minimum commitment 12 months from start or last renewal.
+- 60 days written notice required to cancel at end of term.
+- Price may increase by up to 3% at renewal; you may cancel without penalty if increase exceeds 3%.
+
+Contact: client@telecomfrance.demo
