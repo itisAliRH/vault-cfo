@@ -37,11 +37,14 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="container max-w-sm mx-auto px-6 py-20">
+    <div className="container max-w-lg mx-auto px-6 py-20">
       <Card className="rounded-xl border border-border bg-card shadow-sm">
         <CardHeader>
           <CardTitle className="font-pixel text-lg">Log in</CardTitle>
           <CardDescription>Enter your credentials to access your vault.</CardDescription>
+          <p className="text-xs text-muted-foreground font-pixel rounded-md border border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/50 px-3 py-2 mt-2">
+            This is a demo. No sign-up required — any credentials are accepted.
+          </p>
         </CardHeader>
         <form onSubmit={handleSubmit} noValidate>
           <CardContent className="space-y-4">

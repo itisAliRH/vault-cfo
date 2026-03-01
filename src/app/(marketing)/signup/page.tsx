@@ -40,11 +40,14 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="container max-w-sm mx-auto px-6 py-20">
+    <div className="container max-w-lg mx-auto px-6 py-20">
       <Card className="rounded-xl border border-border bg-card shadow-sm">
         <CardHeader>
           <CardTitle className="font-pixel text-lg">Sign up</CardTitle>
           <CardDescription>Create an account to start using VaultCFO.</CardDescription>
+          <p className="text-xs text-muted-foreground font-pixel rounded-md border border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/50 px-3 py-2 mt-2">
+            This is a demo. No sign-up required — any credentials are accepted.
+          </p>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
@@ -87,7 +90,7 @@ export default function SignUpPage() {
               />
             </div>
           </CardContent>
-          <CardFooter className="flex flex-col gap-3">
+          <CardFooter className="flex flex-col gap-3 pt-6">
             <Button
               type="submit"
               className="w-full font-pixel text-sm bg-orange-500 text-white hover:bg-orange-600 focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-2 disabled:opacity-50"
