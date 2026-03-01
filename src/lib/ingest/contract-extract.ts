@@ -1,6 +1,21 @@
+import { createHash } from "node:crypto";
 import { generateText } from "ai";
 import { z } from "zod";
 import { fastModel } from "@/lib/models";
+
+const EXTRACT_CACHE_MAX = 100;
+const extractCache = new Map<string, ExtractedContractFacts>();
+
+function hashText(text: string): string {
+  return createHash("sha256").update(text.slice(0, 12000)).digest("hex");
+}
+
+function evictExtractCacheIfNeeded() {
+  if (extractCache.size > EXTRACT_CACHE_MAX) {
+    const firstKey = extractCache.keys().next().value;
+    if (firstKey !== undefined) extractCache.delete(firstKey);
+  }
+}
 
 const contractFactsSchema = z.object({
   provider_name: z.string(),
@@ -52,4 +67,15 @@ ${text.slice(0, 12000)}
     }
   }
   throw new Error("Failed to extract contract facts after retry");
+}
+
+/** Extract contract facts with in-memory cache by content hash (same text => skip AI call). */
+export async function getCachedContractFacts(text: string): Promise<ExtractedContractFacts> {
+  const key = hashText(text);
+  const cached = extractCache.get(key);
+  if (cached) return cached;
+  const result = await extractContractFacts(text);
+  extractCache.set(key, result);
+  evictExtractCacheIfNeeded();
+  return result;
 }
