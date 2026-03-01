@@ -43,7 +43,7 @@ export default function LoginPage() {
           <CardTitle className="font-pixel text-lg">Log in</CardTitle>
           <CardDescription>Enter your credentials to access your vault.</CardDescription>
         </CardHeader>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} noValidate>
           <CardContent className="space-y-4">
             {error && (
               <p className="text-sm text-destructive font-pixel">{error}</p>
