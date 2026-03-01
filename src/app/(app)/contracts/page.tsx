@@ -143,7 +143,7 @@ export default function ContractsPage() {
           <Skeleton className="h-8 w-40" />
           <Skeleton className="h-9 w-36" />
         </div>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4">
           {[...Array(3)].map((_, i) => (
             <Skeleton key={i} className="h-40 rounded-xl" />
           ))}
@@ -235,7 +235,7 @@ export default function ContractsPage() {
         </select>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4">
         {filtered.map((c) => (
           <ContractCard
             key={c.id}

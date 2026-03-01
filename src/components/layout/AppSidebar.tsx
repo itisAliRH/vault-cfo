@@ -121,7 +121,7 @@ function StatusBar() {
         {onlineConsent && (
           <Tooltip>
             <TooltipTrigger asChild>
-              <span className="cursor-default rounded border border-secondary bg-secondary/20 px-1.5 py-0.5 font-pixel text-[10px] text-secondary">
+              <span className="cursor-default rounded border border-amber-600 bg-amber-600 px-1.5 py-0.5 font-pixel text-[10px] text-white">
                 ONLINE TOOLS
               </span>
             </TooltipTrigger>
@@ -142,18 +142,28 @@ function StatusBar() {
             </TooltipContent>
           </Tooltip>
         )}
-        {perf?.status === "ok" && (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span className="cursor-default rounded border border-accent bg-accent/10 px-1.5 py-0.5 font-pixel text-[10px] text-accent">
-                AI READY
-              </span>
-            </TooltipTrigger>
-            <TooltipContent side="top">
-              <p className="font-pixel text-[10px]">AI backend connected and responding</p>
-            </TooltipContent>
-          </Tooltip>
-        )}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span
+              className={
+                perf?.status === "ok"
+                  ? "cursor-default rounded border border-accent bg-accent px-1.5 py-0.5 font-pixel text-[10px] text-accent-foreground"
+                  : "cursor-default rounded border border-border bg-muted px-1.5 py-0.5 font-pixel text-[10px] text-foreground"
+              }
+            >
+              AI READY
+            </span>
+          </TooltipTrigger>
+          <TooltipContent side="top">
+            <p className="font-pixel text-[10px]">
+              {perf?.status === "ok"
+                ? "AI backend connected and responding"
+                : perf?.status === "error"
+                  ? "AI backend temporarily unavailable"
+                  : "Checking AI backend…"}
+            </p>
+          </TooltipContent>
+        </Tooltip>
       </div>
     </TooltipProvider>
   );

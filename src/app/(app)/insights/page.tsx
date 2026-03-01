@@ -86,7 +86,7 @@ export default function InsightsPage() {
               {data.budget.byCategory.length > 0 && (
                 <>
                   <p className="font-pixel text-xs text-muted-foreground mb-2">TOP CATEGORIES</p>
-                  <div className="space-y-2">
+                  <div className="space-y-2 pr-4">
                     {data.budget.byCategory.slice(0, 6).map((c) => (
                       <div key={c.category} className="flex items-center gap-3">
                         <span className="text-sm text-foreground min-w-0 w-36 shrink-0 truncate">{c.category}</span>
@@ -98,7 +98,7 @@ export default function InsightsPage() {
                             }}
                           />
                         </div>
-                        <span className="text-sm text-muted-foreground w-24 text-right shrink-0 tabular-nums">
+                        <span className="text-sm text-muted-foreground min-w-[5.5rem] w-28 text-right shrink-0 tabular-nums">
                           €{fmt(c.total)}
                         </span>
                       </div>
