@@ -17,9 +17,9 @@ import { Label } from "@/components/ui/label";
 import type { UserProfile } from "@/types";
 
 const LITERACY_OPTIONS: { value: UserProfile["literacy_level"]; label: string }[] = [
-  { value: "beginner", label: "Beginner — I prefer simple explanations" },
-  { value: "intermediate", label: "Intermediate — I can read charts and basics" },
-  { value: "advanced", label: "Advanced — I want full analytics" },
+  { value: "beginner", label: "Beginner - I prefer simple explanations" },
+  { value: "intermediate", label: "Intermediate - I can read charts and basics" },
+  { value: "advanced", label: "Advanced - I want full analytics" },
 ];
 
 const INSIGHT_OPTIONS: { value: UserProfile["insight_style"]; label: string }[] = [
@@ -79,7 +79,7 @@ export default function OnboardingPage() {
                 type="button"
                 variant="ghost"
                 className={cn(
-                  "h-auto rounded-lg border-2 p-4 text-left text-sm transition-colors font-pixel justify-start",
+                  "min-w-0 w-full rounded-lg border-2 p-4 h-auto text-left text-sm transition-colors font-pixel justify-start whitespace-normal break-words",
                   literacyLevel === opt.value
                     ? "border-primary bg-primary/20 text-primary-foreground"
                     : "border-border text-foreground hover:border-muted-foreground/50 hover:bg-muted/30"
