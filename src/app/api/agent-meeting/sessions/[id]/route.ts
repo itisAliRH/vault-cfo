@@ -37,16 +37,20 @@ export async function PATCH(
 
   try {
     const body = (await request.json()) as {
-      status?: "active" | "ended";
+      status?: "active" | "paused" | "ended";
       transcript?: string | null;
       ended_at?: string | null;
       duration_seconds?: number | null;
+      sharing_config?: string | null;
+      summary?: string | null;
     };
     const updates: Parameters<typeof updateAgentMeeting>[1] = {};
     if (body.status !== undefined) updates.status = body.status;
     if (body.transcript !== undefined) updates.transcript = body.transcript;
     if (body.ended_at !== undefined) updates.ended_at = body.ended_at;
     if (body.duration_seconds !== undefined) updates.duration_seconds = body.duration_seconds;
+    if (body.sharing_config !== undefined) updates.sharing_config = body.sharing_config;
+    if (body.summary !== undefined) updates.summary = body.summary;
     if (Object.keys(updates).length > 0) updateAgentMeeting(id, updates);
     const updated = getAgentMeeting(id);
     return NextResponse.json(updated);
