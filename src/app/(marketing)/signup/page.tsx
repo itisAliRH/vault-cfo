@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ChevronRight } from "lucide-react";
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -29,9 +30,8 @@ export default function SignUpPage() {
     }
     setLoading(true);
     try {
-      // Placeholder: no auth backend yet; redirect to app (onboarding)
-      await new Promise((r) => setTimeout(r, 400));
-      router.replace("/");
+      // No auth backend — new users always go to onboarding first
+      router.replace("/onboarding");
     } catch {
       setError("Something went wrong. Try again.");
     } finally {
@@ -40,8 +40,8 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="container max-w-sm mx-auto px-4 py-16">
-      <Card className="pixel-border">
+    <div className="container max-w-sm mx-auto px-6 py-20">
+      <Card className="rounded-xl border border-border bg-card shadow-sm">
         <CardHeader>
           <CardTitle className="font-pixel text-lg">Sign up</CardTitle>
           <CardDescription>Create an account to start using VaultCFO.</CardDescription>
@@ -88,12 +88,21 @@ export default function SignUpPage() {
             </div>
           </CardContent>
           <CardFooter className="flex flex-col gap-3">
-            <Button type="submit" className="w-full font-pixel text-sm" disabled={loading}>
-              {loading ? "Creating account…" : "Sign up"}
+            <Button
+              type="submit"
+              className="w-full font-pixel text-sm bg-orange-500 text-white hover:bg-orange-600 focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-2 disabled:opacity-50"
+              disabled={loading}
+            >
+              <span className="inline-flex items-center gap-2">
+                {loading ? "Creating account…" : "Sign up"}
+                {!loading && <ChevronRight className="size-4" aria-hidden />}
+              </span>
             </Button>
             <p className="text-muted-foreground text-xs">
               Already have an account?{" "}
-              <Link href="/login" className="text-accent hover:underline">Log in</Link>
+              <Link href="/login" className="text-orange-600 dark:text-orange-400 hover:underline font-pixel focus-visible:ring-2 focus-visible:ring-ring rounded">
+                Log in
+              </Link>
             </p>
           </CardFooter>
         </form>

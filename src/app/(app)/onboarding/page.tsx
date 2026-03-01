@@ -11,6 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { SectionPill } from "@/components/docs/SectionPill";
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 import type { UserProfile } from "@/types";
@@ -52,18 +53,21 @@ export default function OnboardingPage() {
         const msg = errBody.hint ? `${errBody.error ?? "Failed to save"} ${errBody.hint}` : (errBody.error ?? "Failed to save");
         throw new Error(msg);
       }
-      router.replace("/");
+      router.replace("/dashboard");
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <div className="mx-auto max-w-2xl space-y-8 p-8">
-      <h1 className="font-pixel text-2xl text-primary">Setup</h1>
+    <div className="mx-auto max-w-2xl space-y-10 px-6 py-10">
+      <div className="space-y-2">
+        <SectionPill label="ONBOARDING" sectionId="onboarding" />
+        <h1 className="font-pixel text-2xl text-foreground">Setup</h1>
+      </div>
 
       {step === 1 && (
-        <Card className="pixel-border">
+        <Card className="rounded-xl border border-border bg-card transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5">
           <CardHeader>
             <CardTitle className="font-pixel text-sm">Financial literacy</CardTitle>
             <CardDescription className="text-muted-foreground text-base">How comfortable are you with finance?</CardDescription>
@@ -99,7 +103,7 @@ export default function OnboardingPage() {
       )}
 
       {step === 2 && (
-        <Card className="pixel-border">
+        <Card className="rounded-xl border border-border bg-card transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5">
           <CardHeader>
             <CardTitle className="font-pixel text-sm">Insight style</CardTitle>
             <CardDescription className="text-muted-foreground text-base">How would you like insights?</CardDescription>
@@ -132,7 +136,7 @@ export default function OnboardingPage() {
       )}
 
       {step === 3 && (
-        <Card className="pixel-border">
+        <Card className="rounded-xl border border-border bg-card transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5">
           <CardHeader>
             <CardTitle className="font-pixel text-sm">Privacy</CardTitle>
             <CardDescription className="text-muted-foreground text-base">Your data stays local by default.</CardDescription>
