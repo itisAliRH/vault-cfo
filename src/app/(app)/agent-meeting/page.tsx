@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Video, Plus, Trash2, Calendar, Clock } from "lucide-react";
 import { useToast } from "@/components/ui/toast";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Session {
   id: string;
@@ -128,7 +129,11 @@ export default function AgentMeetingPage() {
       </div>
 
       {loading ? (
-        <p className="text-sm text-muted-foreground">Loading sessions…</p>
+        <div className="space-y-3">
+          {[...Array(3)].map((_, i) => (
+            <Skeleton key={i} className="h-20 w-full rounded-xl" />
+          ))}
+        </div>
       ) : sessions.length === 0 ? (
         <Card className="border border-border bg-card">
           <CardHeader>

@@ -12,11 +12,27 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { SIMLI_FACE_IDS, SIMLI_FACE_LABELS } from "@/lib/simli";
 import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type ConnectionStatus = "connecting" | "connected" | "disconnected" | "error";
 
 type FaceChoice = keyof typeof SIMLI_FACE_IDS;
 const FACE_OPTIONS: FaceChoice[] = ["tina", "hank"];
+
+const FACE_DETAILS: Record<FaceChoice, { title: string; role: string; description: string; specialty: string[] }> = {
+  tina: {
+    title: "Tina",
+    role: "Personal Finance Advisor",
+    description: "Warm and approachable. Specialises in budgeting, savings goals, and everyday money management.",
+    specialty: ["Budgeting", "Savings", "Debt reduction"],
+  },
+  hank: {
+    title: "Hank",
+    role: "Investment & Tax Consultant",
+    description: "Direct and analytical. Focuses on investments, tax optimisation, and long-term wealth building.",
+    specialty: ["Investments", "Tax planning", "Wealth strategy"],
+  },
+};
 
 type PageProps = { params: Promise<{ id: string }> };
 
@@ -139,8 +155,13 @@ function AgentMeetingSessionInner({ params }: PageProps) {
 
   if (!sessionStatus) {
     return (
-      <div className="container max-w-4xl mx-auto px-6 py-12 text-center">
-        <p className="text-muted-foreground">Loading session…</p>
+      <div className="container max-w-4xl mx-auto px-6 py-8 space-y-6">
+        <Skeleton className="h-8 w-24" />
+        <Skeleton className="aspect-video max-w-2xl mx-auto rounded-xl" />
+        <div className="flex gap-3 max-w-2xl mx-auto">
+          <Skeleton className="flex-1 h-28 rounded-xl" />
+          <Skeleton className="flex-1 h-28 rounded-xl" />
+        </div>
       </div>
     );
   }
@@ -205,27 +226,49 @@ function AgentMeetingSessionInner({ params }: PageProps) {
       </div>
 
       {status === "disconnected" && (
-        <div className="rounded-lg border border-border bg-card p-4">
-          <p className="font-pixel text-xs text-muted-foreground mb-3">
+        <div className="rounded-lg border border-border bg-card p-4 space-y-3">
+          <p className="font-pixel text-xs text-muted-foreground">
             Choose your consultant
           </p>
-          <div className="flex gap-2">
-            {FACE_OPTIONS.map((key) => (
-              <button
-                key={key}
-                type="button"
-                onClick={() => setFaceChoice(key)}
-                className={cn(
-                  "flex-1 rounded-lg border px-4 py-2.5 text-sm font-medium transition-colors",
-                  faceChoice === key
-                    ? "border-orange-500 bg-orange-500/10 text-orange-600 dark:text-orange-400"
-                    : "border-border bg-muted/50 text-muted-foreground hover:bg-muted"
-                )}
-                aria-pressed={faceChoice === key}
-              >
-                {SIMLI_FACE_LABELS[key]}
-              </button>
-            ))}
+          <div className="grid grid-cols-2 gap-3">
+            {FACE_OPTIONS.map((key) => {
+              const details = FACE_DETAILS[key];
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setFaceChoice(key)}
+                  className={cn(
+                    "rounded-xl border-2 p-4 text-left transition-colors",
+                    faceChoice === key
+                      ? "border-orange-500 bg-orange-500/10"
+                      : "border-border bg-muted/30 hover:bg-muted/60"
+                  )}
+                  aria-pressed={faceChoice === key}
+                >
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className={cn(
+                      "size-10 rounded-full flex items-center justify-center font-pixel text-lg font-bold border-2",
+                      faceChoice === key ? "border-orange-500 bg-orange-500/20 text-orange-600" : "border-border bg-muted text-muted-foreground"
+                    )}>
+                      {details.title[0]}
+                    </div>
+                    <div>
+                      <p className="font-pixel text-sm font-semibold">{details.title}</p>
+                      <p className="text-xs text-muted-foreground">{details.role}</p>
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed mb-2">{details.description}</p>
+                  <div className="flex flex-wrap gap-1">
+                    {details.specialty.map((s) => (
+                      <span key={s} className="rounded-full border border-border bg-muted/50 px-2 py-0.5 font-pixel text-[9px] text-muted-foreground">
+                        {s}
+                      </span>
+                    ))}
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
       )}
@@ -241,8 +284,15 @@ function AgentMeetingSessionInner({ params }: PageProps) {
           onStartReady={(fn) => { startRef.current = fn; }}
         />
       ) : (
-        <div className="flex items-center justify-center h-40 text-sm text-muted-foreground">
-          Preparing consultant…
+        <div className="space-y-3">
+          <Skeleton className="aspect-video max-w-2xl mx-auto rounded-xl" />
+          <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+            <svg className="size-4 animate-spin" viewBox="0 0 24 24" fill="none">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+            </svg>
+            <span className="font-pixel text-xs">Preparing {FACE_DETAILS[faceChoice].title}…</span>
+          </div>
         </div>
       )}
 
