@@ -1,4 +1,5 @@
 import Database from "better-sqlite3";
+import { randomUUID } from "node:crypto";
 import { mkdirSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import {
@@ -89,8 +90,26 @@ function runMigrations(database: Database.Database) {
       timestamp TEXT NOT NULL
     );
 
+    CREATE TABLE IF NOT EXISTS agent_meetings (
+      id TEXT PRIMARY KEY,
+      title TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'active',
+      agent_id TEXT NOT NULL,
+      transcript TEXT,
+      created_at TEXT NOT NULL,
+      ended_at TEXT,
+      duration_seconds INTEGER
+    );
+
+    CREATE TABLE IF NOT EXISTS agent_config (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+
     CREATE INDEX IF NOT EXISTS idx_transactions_date ON transactions(date);
     CREATE INDEX IF NOT EXISTS idx_contract_facts_contract_id ON contract_facts(contract_id);
+    CREATE INDEX IF NOT EXISTS idx_agent_meetings_created_at ON agent_meetings(created_at);
   `);
 }
 
@@ -291,6 +310,8 @@ export function wipeVault(): void {
   const database = getDb();
   database.exec(`
     DELETE FROM network_audit;
+    DELETE FROM agent_meetings;
+    DELETE FROM agent_config;
     DELETE FROM chat_sessions;
     DELETE FROM insights;
     DELETE FROM contract_facts;
@@ -375,7 +396,6 @@ export function clearChatHistory(): void {
 
 // --- Network audit ---
 export function logNetworkRequest(url: string, method = "POST"): void {
-  const { randomUUID } = require("node:crypto") as typeof import("node:crypto");
   getDb()
     .prepare("INSERT INTO network_audit (id, url, method, timestamp) VALUES (?, ?, ?, ?)")
     .run(randomUUID(), url, method, new Date().toISOString());
@@ -384,4 +404,128 @@ export function logNetworkRequest(url: string, method = "POST"): void {
 export function getNetworkAudit(): { id: string; url: string; method: string; timestamp: string }[] {
   const rows = getDb().prepare("SELECT id, url, method, timestamp FROM network_audit ORDER BY timestamp DESC LIMIT 100").all() as { id: string; url: string; method: string; timestamp: string }[];
   return rows;
+}
+
+// --- Agent meetings ---
+export interface AgentMeeting {
+  id: string;
+  title: string;
+  status: "active" | "ended";
+  agent_id: string;
+  transcript: string | null;
+  created_at: string;
+  ended_at: string | null;
+  duration_seconds: number | null;
+}
+
+export function insertAgentMeeting(meeting: Omit<AgentMeeting, "ended_at" | "duration_seconds"> & { ended_at?: string | null; duration_seconds?: number | null }): void {
+  getDb()
+    .prepare(
+      `INSERT INTO agent_meetings (id, title, status, agent_id, transcript, created_at, ended_at, duration_seconds)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+    )
+    .run(
+      meeting.id,
+      meeting.title,
+      meeting.status,
+      meeting.agent_id,
+      meeting.transcript ?? null,
+      meeting.created_at,
+      meeting.ended_at ?? null,
+      meeting.duration_seconds ?? null
+    );
+}
+
+export function getAgentMeetings(): AgentMeeting[] {
+  const rows = getDb()
+    .prepare(
+      "SELECT id, title, status, agent_id, transcript, created_at, ended_at, duration_seconds FROM agent_meetings ORDER BY created_at DESC"
+    )
+    .all() as {
+    id: string;
+    title: string;
+    status: string;
+    agent_id: string;
+    transcript: string | null;
+    created_at: string;
+    ended_at: string | null;
+    duration_seconds: number | null;
+  }[];
+  return rows.map((r) => ({
+    id: r.id,
+    title: r.title,
+    status: r.status as "active" | "ended",
+    agent_id: r.agent_id,
+    transcript: r.transcript,
+    created_at: r.created_at,
+    ended_at: r.ended_at,
+    duration_seconds: r.duration_seconds,
+  }));
+}
+
+export function getAgentMeeting(id: string): AgentMeeting | null {
+  const row = getDb()
+    .prepare(
+      "SELECT id, title, status, agent_id, transcript, created_at, ended_at, duration_seconds FROM agent_meetings WHERE id = ?"
+    )
+    .get(id) as {
+    id: string;
+    title: string;
+    status: string;
+    agent_id: string;
+    transcript: string | null;
+    created_at: string;
+    ended_at: string | null;
+    duration_seconds: number | null;
+  } | undefined;
+  if (!row) return null;
+  return {
+    id: row.id,
+    title: row.title,
+    status: row.status as "active" | "ended",
+    agent_id: row.agent_id,
+    transcript: row.transcript,
+    created_at: row.created_at,
+    ended_at: row.ended_at,
+    duration_seconds: row.duration_seconds,
+  };
+}
+
+export function updateAgentMeeting(
+  id: string,
+  updates: { status?: "active" | "ended"; transcript?: string | null; ended_at?: string | null; duration_seconds?: number | null }
+): void {
+  const meeting = getAgentMeeting(id);
+  if (!meeting) return;
+  const status = updates.status ?? meeting.status;
+  const transcript = updates.transcript !== undefined ? updates.transcript : meeting.transcript;
+  const ended_at = updates.ended_at !== undefined ? updates.ended_at : meeting.ended_at;
+  const duration_seconds = updates.duration_seconds !== undefined ? updates.duration_seconds : meeting.duration_seconds;
+  getDb()
+    .prepare(
+      "UPDATE agent_meetings SET status = ?, transcript = ?, ended_at = ?, duration_seconds = ? WHERE id = ?"
+    )
+    .run(status, transcript, ended_at, duration_seconds, id);
+}
+
+export function deleteAgentMeeting(id: string): void {
+  getDb().prepare("DELETE FROM agent_meetings WHERE id = ?").run(id);
+}
+
+// --- Agent config (e.g. cached agent_id) ---
+export function getAgentConfig(key: string): string | null {
+  const row = getDb()
+    .prepare("SELECT value FROM agent_config WHERE key = ?")
+    .get(key) as { value: string } | undefined;
+  return row?.value ?? null;
+}
+
+export function setAgentConfig(key: string, value: string): void {
+  const now = new Date().toISOString();
+  getDb()
+    .prepare(
+      `INSERT INTO agent_config (key, value, updated_at) VALUES (?, ?, ?)
+       ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at`
+    )
+    .run(key, value, now);
 }
