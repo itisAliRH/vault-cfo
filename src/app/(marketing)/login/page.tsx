@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ChevronRight } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -20,9 +21,14 @@ export default function LoginPage() {
     setError("");
     setLoading(true);
     try {
-      // Placeholder: no auth backend yet; redirect to app (onboarding guard will send to onboarding if needed)
-      await new Promise((r) => setTimeout(r, 400));
-      router.replace("/");
+      // No auth backend — check if onboarding is complete and route accordingly
+      const res = await fetch("/api/onboarding");
+      const data = await res.json() as { profile?: { id?: string } | null };
+      if (data.profile?.id) {
+        router.replace("/dashboard");
+      } else {
+        router.replace("/onboarding");
+      }
     } catch {
       setError("Something went wrong. Try again.");
     } finally {
@@ -31,8 +37,8 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="container max-w-sm mx-auto px-4 py-16">
-      <Card className="pixel-border">
+    <div className="container max-w-sm mx-auto px-6 py-20">
+      <Card className="rounded-xl border border-border bg-card shadow-sm">
         <CardHeader>
           <CardTitle className="font-pixel text-lg">Log in</CardTitle>
           <CardDescription>Enter your credentials to access your vault.</CardDescription>
@@ -66,13 +72,20 @@ export default function LoginPage() {
               />
             </div>
           </CardContent>
-          <CardFooter className="flex flex-col gap-3">
-            <Button type="submit" className="w-full font-pixel text-sm" disabled={loading}>
-              {loading ? "Signing in…" : "Log in"}
+          <CardFooter className="flex flex-col gap-3 pt-6">
+            <Button
+              type="submit"
+              className="w-full font-pixel text-sm bg-orange-500 text-white hover:bg-orange-600 focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-2 disabled:opacity-50"
+              disabled={loading}
+            >
+              <span className="inline-flex items-center gap-2">
+                {loading ? "Signing in…" : "Log in"}
+                {!loading && <ChevronRight className="size-4" aria-hidden />}
+              </span>
             </Button>
             <p className="text-muted-foreground text-xs">
               Don’t have an account?{" "}
-              <Link href="/signup" className="text-accent hover:underline">Sign up</Link>
+              <Link href="/signup" className="text-orange-600 dark:text-orange-400 hover:underline font-pixel focus-visible:ring-2 focus-visible:ring-ring rounded">Sign up</Link>
             </p>
           </CardFooter>
         </form>
