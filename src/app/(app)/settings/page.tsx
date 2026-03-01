@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { SectionPill } from "@/components/docs/SectionPill";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -136,6 +137,7 @@ export default function SettingsPage() {
         throw new Error("Failed to update preference");
       }
       setProfile({ ...profile, online_consent: checked });
+      window.dispatchEvent(new CustomEvent("online-consent-change", { detail: checked }));
       toast({
         title: checked ? "Online tools enabled" : "Online tools disabled",
         variant: "info",
@@ -171,11 +173,15 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="container space-y-8 py-8">
-      <h1 className="font-pixel text-2xl text-primary">Settings</h1>
+    <div className="container max-w-6xl mx-auto space-y-10 px-6 py-8">
+      <div className="space-y-2">
+        <SectionPill label="SETTINGS" sectionId="settings" copyLink />
+        <h1 className="font-pixel text-2xl text-foreground">Settings</h1>
+      </div>
 
-      <Card className="pixel-border">
+      <Card className="rounded-xl border border-border bg-card transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5">
         <CardHeader>
+          <SectionPill label="PERFORMANCE" className="mb-2" />
           <CardTitle className="font-pixel text-sm">Performance (Mistral API)</CardTitle>
           <CardDescription>Cached 30s</CardDescription>
         </CardHeader>
@@ -197,8 +203,9 @@ export default function SettingsPage() {
         </CardContent>
       </Card>
 
-      <Card className="pixel-border">
+      <Card className="rounded-xl border border-border bg-card transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5">
         <CardHeader>
+          <SectionPill label="DATA" className="mb-2" />
           <CardTitle className="font-pixel text-sm">Data</CardTitle>
           <CardDescription>Export or wipe your vault</CardDescription>
         </CardHeader>
@@ -227,8 +234,9 @@ export default function SettingsPage() {
         </DialogContent>
       </Dialog>
 
-      <Card className="pixel-border">
+      <Card className="rounded-xl border border-border bg-card transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5">
         <CardHeader>
+          <SectionPill label="PRIVACY" className="mb-2" />
           <CardTitle className="font-pixel text-sm">Privacy</CardTitle>
           <CardDescription>Allow online tools when you explicitly ask</CardDescription>
         </CardHeader>
@@ -244,8 +252,9 @@ export default function SettingsPage() {
         </CardContent>
       </Card>
 
-      <Card className="pixel-border">
+      <Card className="rounded-xl border border-border bg-card transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5">
         <CardHeader>
+          <SectionPill label="NETWORK" className="mb-2" />
           <CardTitle className="font-pixel text-sm">Network log</CardTitle>
           <CardDescription>Outbound requests when online tools are used</CardDescription>
         </CardHeader>
@@ -275,8 +284,9 @@ export default function SettingsPage() {
         </CardContent>
       </Card>
 
-      <Card className="pixel-border">
+      <Card className="rounded-xl border border-border bg-card transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5">
         <CardHeader>
+          <SectionPill label="ONBOARDING" className="mb-2" />
           <CardTitle className="font-pixel text-sm">Onboarding &amp; model</CardTitle>
           <CardDescription>Reset onboarding or view model config</CardDescription>
         </CardHeader>
@@ -285,7 +295,7 @@ export default function SettingsPage() {
             Reset onboarding
           </Button>
           <p className="text-xs text-muted-foreground">
-            Model: Mistral Small 3.2 via MISTRAL_API_KEY (configurable in .env).
+            Model: {perf?.model_name ?? "mistral-small-latest"} via MISTRAL_API_KEY (configurable in .env.local).
           </p>
         </CardContent>
       </Card>

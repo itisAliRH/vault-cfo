@@ -22,15 +22,14 @@ import {
   SidebarFooter,
   SidebarHeader,
 } from "@/components/ui/sidebar";
-import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 const navItems = [
-  { href: "/", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/", label: "Home", icon: Home },
+  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/contracts", label: "Contracts", icon: FileText },
   { href: "/insights", label: "Insights", icon: Lightbulb },
   { href: "/chat", label: "Agent Chat", icon: MessageSquare },
   { href: "/settings", label: "Settings", icon: Settings },
-  { href: "/landing", label: "Landing", icon: Home },
 ];
 
 export function AppSidebar() {
@@ -38,9 +37,8 @@ export function AppSidebar() {
 
   return (
     <Sidebar className="pixel-border border-t-0 border-l-0 border-b-0">
-      <SidebarHeader className="flex items-center justify-between border-b border-sidebar-border px-2 py-2">
+      <SidebarHeader className="flex items-center border-b border-sidebar-border px-2 py-2">
         <span className="font-pixel text-xs text-sidebar-primary">VaultCFO</span>
-        <ThemeToggle />
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
@@ -77,13 +75,26 @@ function StatusBar() {
     latency_ms?: number | null;
     gpu_name?: string | null;
   } | null>(null);
-  const [onlineConsent] = React.useState(false);
+  const [onlineConsent, setOnlineConsent] = React.useState(false);
 
   React.useEffect(() => {
     fetch("/api/health/perf")
       .then((r) => r.json())
       .then(setPerf)
       .catch(() => setPerf(null));
+
+    fetch("/api/onboarding")
+      .then((r) => r.ok ? r.json() : null)
+      .then((d: { profile?: { online_consent?: boolean } } | null) => {
+        setOnlineConsent(!!d?.profile?.online_consent);
+      })
+      .catch(() => {});
+
+    const handler = (e: Event) => {
+      setOnlineConsent((e as CustomEvent<boolean>).detail);
+    };
+    window.addEventListener("online-consent-change", handler);
+    return () => window.removeEventListener("online-consent-change", handler);
   }, []);
 
   return (
@@ -96,9 +107,14 @@ function StatusBar() {
           ONLINE TOOLS ENABLED
         </span>
       )}
-      {perf?.status === "ok" && (
+      {perf?.status === "ok" && perf.gpu_name && perf.gpu_name !== "Mistral backend" && (
         <span className="rounded border border-accent bg-accent/10 px-1.5 py-0.5 font-pixel text-[10px] text-accent">
           NVIDIA GPU
+        </span>
+      )}
+      {perf?.status === "ok" && (
+        <span className="rounded border border-accent bg-accent/10 px-1.5 py-0.5 font-pixel text-[10px] text-accent">
+          AI READY
         </span>
       )}
     </div>
