@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { insertTransaction, getTransactions } from "@/lib/db";
 import { parseCSV, parseJSON } from "@/lib/ingest/csv";
+import { invalidateInsightsCache } from "@/app/api/insights/route";
 import { randomUUID } from "node:crypto";
 
 export async function GET(request: NextRequest) {
@@ -37,6 +38,7 @@ export async function POST(request: NextRequest) {
         recurring: row.recurring,
       });
     }
+    invalidateInsightsCache();
     return NextResponse.json({ ok: true, count: rows.length });
   } catch (e) {
     console.error(e);
