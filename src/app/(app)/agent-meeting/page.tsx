@@ -10,7 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Video, Plus, Trash2, Calendar, Clock } from "lucide-react";
+import { Video, Plus, Trash2, Calendar, Clock, MessageSquare } from "lucide-react";
 import { useToast } from "@/components/ui/toast";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -108,7 +108,7 @@ export default function AgentMeetingPage() {
   };
 
   return (
-    <div className="container max-w-4xl mx-auto px-6 py-8 space-y-8">
+    <div className="container max-w-80% mx-auto px-6 py-8 space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold font-pixel tracking-tight">
@@ -188,17 +188,33 @@ export default function AgentMeetingPage() {
                         className={
                           session.status === "active"
                             ? "text-green-600 dark:text-green-400"
-                            : ""
+                            : session.status === "paused"
+                              ? "text-amber-600 dark:text-amber-400"
+                              : ""
                         }
                       >
-                        {session.status === "active" ? "Active" : "Ended"}
+                        {session.status === "active"
+                          ? "Active"
+                          : session.status === "paused"
+                            ? "Paused"
+                            : "Ended"}
                       </span>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    {session.status === "active" && (
+                    {(session.status === "active" || session.status === "paused") && (
                       <Button variant="outline" size="sm" asChild className="font-pixel">
-                        <Link href={`/agent-meeting/${session.id}?auto=1`}>Resume</Link>
+                        <Link href={session.status === "active" ? `/agent-meeting/${session.id}?auto=1` : `/agent-meeting/${session.id}`}>
+                          Resume
+                        </Link>
+                      </Button>
+                    )}
+                    {session.status === "ended" && (
+                      <Button variant="outline" size="sm" asChild className="font-pixel gap-1">
+                        <Link href={`/agent-meeting/${session.id}`}>
+                          <MessageSquare className="size-3" aria-hidden />
+                          View transcript
+                        </Link>
                       </Button>
                     )}
                     <Button
