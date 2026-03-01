@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { ChatEmptyIcon } from "@/components/chat/ChatEmptyIcon";
+import { useToast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
 
 const SUGGESTED_PROMPTS = [
@@ -31,7 +32,11 @@ export default function ChatPage() {
   const [thinkMode, setThinkMode] = useState(false);
   const [toolTraceOpen, setToolTraceOpen] = useState(true);
   const [playingId, setPlayingId] = useState<string | null>(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [sttError, setSttError] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
 
   const transport = useMemo(
     () => new DefaultChatTransport({ api: "/api/chat" }),
@@ -39,6 +44,7 @@ export default function ChatPage() {
   );
 
   const { messages, sendMessage, status, setMessages } = useChat({ transport });
+  const { toast } = useToast();
   const isLoading = status === "submitted" || status === "streaming";
   const hasMessages = messages.length > 0;
 
@@ -116,7 +122,10 @@ export default function ChatPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text }),
       });
-      if (!res.ok) return;
+      if (!res.ok) {
+        setPlayingId(null);
+        return;
+      }
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const audio = new Audio(url);
@@ -127,6 +136,67 @@ export default function ChatPage() {
       setPlayingId(null);
     }
   }, [playingId]);
+
+  const handleVoiceInput = useCallback(async () => {
+    if (isLoading) return;
+    setSttError(null);
+
+    if (isRecording) {
+      const mr = mediaRecorderRef.current;
+      if (mr && mr.state !== "inactive") {
+        mr.stop();
+      }
+      setIsRecording(false);
+      return;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      chunksRef.current = [];
+      const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus") ? "audio/webm;codecs=opus" : "audio/webm";
+      const recorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = recorder;
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) chunksRef.current.push(e.data);
+      };
+      recorder.onstop = async () => {
+        stream.getTracks().forEach((t) => t.stop());
+        const blob = new Blob(chunksRef.current, { type: mimeType });
+        if (blob.size === 0) {
+          setSttError("No audio recorded");
+          return;
+        }
+        try {
+          const formData = new FormData();
+          formData.append("file", blob, "recording.webm");
+          const res = await fetch("/api/voice/stt", { method: "POST", body: formData });
+          if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            const msg = (err as { error?: string }).error ?? "Speech recognition failed";
+            setSttError(msg);
+            if (res.status === 503) {
+              toast({ title: "Voice input unavailable", description: "Set ELEVENLABS_API_KEY for STT.", variant: "error" });
+            }
+            return;
+          }
+          const { text } = (await res.json()) as { text?: string };
+          if (text && text.trim()) {
+            setInput(text.trim());
+            sendMessage({ text: text.trim(), metadata: { thinkMode } });
+          } else {
+            setSttError("No speech detected");
+          }
+        } catch {
+          setSttError("Failed to transcribe");
+        }
+      };
+      recorder.start(100);
+      setIsRecording(true);
+    } catch {
+      setSttError("Microphone access denied");
+      toast({ title: "Microphone access denied", variant: "error" });
+    }
+  }, [isRecording, isLoading, thinkMode, sendMessage, toast]);
 
   const handleClearHistory = async () => {
     await fetch("/api/chat/history", { method: "DELETE" });
@@ -297,27 +367,34 @@ export default function ChatPage() {
               </Tooltip>
             </div>
             <form onSubmit={handleSubmit} className="flex flex-1 gap-2 min-w-0">
-              <input
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="Ask VaultCFO…"
-                className="flex-1 min-w-0 rounded-md border-0 bg-transparent px-2 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-0"
-                aria-label="Message"
-              />
+              <div className="flex flex-1 flex-col min-w-0">
+                <input
+                  value={input}
+                  onChange={(e) => { setInput(e.target.value); setSttError(null); }}
+                  placeholder="Ask VaultCFO…"
+                  className="flex-1 min-w-0 rounded-md border-0 bg-transparent px-2 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-0"
+                  aria-label="Message"
+                />
+                {sttError && (
+                  <p className="text-destructive text-[10px] px-2 pb-0.5" role="alert">{sttError}</p>
+                )}
+              </div>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="font-pixel shrink-0"
-                    aria-label="Voice input (press to talk)"
+                    className={cn("font-pixel shrink-0", isRecording && "bg-destructive/20 text-destructive")}
+                    aria-label={isRecording ? "Stop recording" : "Voice input (press to talk)"}
+                    onClick={handleVoiceInput}
+                    disabled={isLoading}
                   >
                     <Mic className="size-4" aria-hidden />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Ask your CFO with voice. Set ELEVENLABS_API_KEY for TTS.</p>
+                  <p>{isRecording ? "Click again to stop and send" : "Ask your CFO with voice. Set ELEVENLABS_API_KEY for STT/TTS."}</p>
                 </TooltipContent>
               </Tooltip>
               <Button
