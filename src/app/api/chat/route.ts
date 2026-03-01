@@ -20,15 +20,18 @@ Think mode is ENABLED. Before answering, reason step-by-step through the problem
 export const maxDuration = 60;
 
 export async function POST(req: NextRequest) {
-  const body = await req.json() as { messages?: unknown[] };
+  const body = (await req.json()) as {
+    messages?: unknown[];
+    thinkMode?: boolean;
+  };
   const { messages } = body;
-  // thinkMode is embedded in the last message's metadata by the client
-  const lastMsg = Array.isArray(messages) ? messages[messages.length - 1] : null;
+  // thinkMode is sent in body by the client when the lightbulb is on
   const thinkMode = Boolean(
-    lastMsg &&
-    typeof lastMsg === "object" &&
-    "metadata" in (lastMsg as object) &&
-    (lastMsg as { metadata?: { thinkMode?: boolean } }).metadata?.thinkMode
+    body.thinkMode ||
+    (Array.isArray(messages) &&
+      messages.length > 0 &&
+      typeof messages[messages.length - 1] === "object" &&
+      (messages[messages.length - 1] as { metadata?: { thinkMode?: boolean } }).metadata?.thinkMode)
   );
 
   // Check online consent before making outbound calls

@@ -105,8 +105,8 @@ export default function ChatPage() {
     const text = input.trim();
     if (!text || isLoading) return;
     setInput("");
-    // Pass thinkMode flag via metadata so the API route can use it
-    sendMessage({ text, metadata: { thinkMode } });
+    // Pass thinkMode in body so the API route receives it (metadata is not always sent with messages)
+    sendMessage({ text }, { body: { thinkMode } });
   };
 
   const handleTTS = useCallback(async (text: string, msgId: string) => {
@@ -182,7 +182,7 @@ export default function ChatPage() {
           const { text } = (await res.json()) as { text?: string };
           if (text && text.trim()) {
             setInput(text.trim());
-            sendMessage({ text: text.trim(), metadata: { thinkMode } });
+            sendMessage({ text: text.trim() }, { body: { thinkMode } });
           } else {
             setSttError("No speech detected");
           }
@@ -268,7 +268,7 @@ export default function ChatPage() {
                         ) : "parts" in m ? (
                           <MessageParts parts={(m as { parts: unknown[] }).parts} />
                         ) : (
-                          <p className="text-sm">[Message]</p>
+                          <p className="text-sm text-muted-foreground">…</p>
                         )}
                         {m.role === "assistant" && textContent && (
                           <button
@@ -505,5 +505,6 @@ function MessageParts({ parts }: { parts: unknown[] }) {
     )
     .map((p) => p.text ?? "")
     .join("");
-  return <p className="text-sm whitespace-pre-wrap">{text || "[No text]"}</p>;
+  if (!text.trim()) return <p className="text-sm text-muted-foreground">…</p>;
+  return <p className="text-sm whitespace-pre-wrap">{text}</p>;
 }
