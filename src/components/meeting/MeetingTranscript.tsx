@@ -2,11 +2,9 @@
 
 import React, { useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
+import type { TranscriptEntry } from "@/types/meeting";
 
-export interface TranscriptEntry {
-  role: "user" | "agent";
-  text: string;
-}
+export type { TranscriptEntry };
 
 export interface MeetingTranscriptProps {
   entries: TranscriptEntry[];
