@@ -56,7 +56,7 @@ export async function GET() {
         ? (usage as { totalTokens?: number }).totalTokens
         : null;
     cached = {
-      model_name: "mistral-small-3-2-25-06",
+      model_name: "mistral-small-latest",
       latency_ms,
       gpu_name: "Mistral backend",
       vram_usage_mb: null,
