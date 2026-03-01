@@ -59,27 +59,7 @@ export async function POST(request: NextRequest) {
     try {
       facts = await extractContractFacts(text);
     } catch (err) {
-      // #region agent log
-      fetch("http://127.0.0.1:7524/ingest/0bfddef5-e779-4680-895c-1765323b8807", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Debug-Session-Id": "237f40",
-        },
-        body: JSON.stringify({
-          sessionId: "237f40",
-          runId: "pre-fix",
-          hypothesisId: "H1",
-          location: "api/contracts/route.ts:POST:fallback",
-          message: "extractContractFacts failed, using fallback facts",
-          data: {
-            error: err instanceof Error ? err.message : String(err),
-          },
-          timestamp: Date.now(),
-        }),
-      }).catch(() => {});
-      // #endregion
-
+      console.error("extractContractFacts failed, using fallback:", err);
       facts = {
         provider_name: "Unknown",
         monthly_cost: 0,
@@ -88,6 +68,7 @@ export async function POST(request: NextRequest) {
         key_clauses: [],
       };
     }
+
     insertContractFacts({
       contract_id: id,
       provider: facts.provider_name,
@@ -100,31 +81,6 @@ export async function POST(request: NextRequest) {
       penalty_description: facts.penalty_description,
       key_clauses: facts.key_clauses,
     });
-
-    // #region agent log
-    fetch("http://127.0.0.1:7524/ingest/0bfddef5-e779-4680-895c-1765323b8807", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Debug-Session-Id": "237f40",
-      },
-      body: JSON.stringify({
-        sessionId: "237f40",
-        runId: "pre-fix",
-        hypothesisId: "H2",
-        location: "api/contracts/route.ts:POST:inserted",
-        message: "contract facts inserted",
-        data: {
-          contract_id: id,
-          provider: facts.provider_name,
-          monthly_cost: facts.monthly_cost,
-          currency: facts.currency,
-          renewal_date: facts.renewal_date,
-        },
-        timestamp: Date.now(),
-      }),
-    }).catch(() => {});
-    // #endregion
 
     return NextResponse.json({ ok: true, id });
   } catch (e) {

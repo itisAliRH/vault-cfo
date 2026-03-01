@@ -9,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { SectionPill } from "@/components/docs/SectionPill";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -72,9 +73,12 @@ export default function ContractsPage() {
   }
 
   return (
-    <div className="container space-y-8 p-8">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="font-pixel text-2xl text-primary">Contracts</h1>
+    <div className="container max-w-6xl mx-auto space-y-10 px-6 py-8">
+      <div className="flex flex-wrap items-center justify-between gap-6">
+        <div className="space-y-2">
+          <SectionPill label="CONTRACTS" sectionId="contracts" copyLink />
+          <h1 className="font-pixel text-2xl text-foreground">Contracts</h1>
+        </div>
         <Dialog open={uploadOpen} onOpenChange={setUploadOpen}>
           <DialogTrigger asChild>
             <Button className="font-pixel text-xs">
@@ -139,7 +143,7 @@ function ContractCard({
   const inCancellationWindow = daysUntilDeadline != null && daysUntilDeadline >= 0 && daysUntilDeadline <= (facts?.notice_period_days ?? 30);
 
   return (
-    <Card className="pixel-border">
+    <Card className="rounded-xl border border-border bg-card transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5">
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between gap-2">
           <CardTitle className="font-pixel text-sm">{facts?.provider ?? contract.filename}</CardTitle>
