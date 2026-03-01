@@ -173,6 +173,31 @@ export function insertTransaction(tx: Omit<Transaction, "encrypted_blob">): void
     .run(tx.id, tx.date, serializeEncrypted(blob));
 }
 
+/** Batch insert transactions in a single DB transaction (faster for demo generation). */
+export function insertTransactions(txs: Array<Omit<Transaction, "encrypted_blob">>): void {
+  if (txs.length === 0) return;
+  const passphrase = getPassphrase();
+  const database = getDb();
+  const stmt = database.prepare(
+    "INSERT INTO transactions (id, date, encrypted_blob) VALUES (?, ?, ?)"
+  );
+  database.transaction(() => {
+    for (const tx of txs) {
+      const blob = encrypt(
+        JSON.stringify({
+          merchant: tx.merchant,
+          amount: tx.amount,
+          category: tx.category,
+          currency: tx.currency,
+          recurring: tx.recurring ?? false,
+        }),
+        passphrase
+      );
+      stmt.run(tx.id, tx.date, serializeEncrypted(blob));
+    }
+  })();
+}
+
 function decryptBlob(encryptedBlob: string, passphrase: string): Record<string, unknown> {
   const payload = deserializeEncrypted(encryptedBlob);
   const decrypted = decrypt(payload, passphrase);
