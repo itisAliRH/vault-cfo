@@ -9,7 +9,7 @@ const client = createOpenAICompatible({
   apiKey: apiKey || "dummy",
 });
 
-// Mistral Small 3.2 for fast tasks (analytics, simple Q&A)
-export const fastModel = client("mistral-small-3-2-25-06");
-// Mistral Small 3.2 also used for reasoning to keep the demo simple
-export const reasoningModel = client("mistral-small-3-2-25-06");
+// Mistral Small for fast tasks (chat, analytics)
+export const fastModel = client("mistral-small-latest");
+// Magistral Small for deeper reasoning (think mode, contract extraction)
+export const reasoningModel = client("magistral-small-latest");

@@ -4,7 +4,7 @@ import { join } from "node:path";
 import {
   encrypt,
   decrypt,
-  getEncryptionKey,
+  getPassphrase,
   serializeEncrypted,
   deserializeEncrypted,
 } from "./encryption";
@@ -134,7 +134,7 @@ export function deleteUserProfile(): void {
 
 // --- Transactions (encrypted) ---
 export function insertTransaction(tx: Omit<Transaction, "encrypted_blob">): void {
-  const key = getEncryptionKey();
+  const passphrase = getPassphrase();
   const blob = encrypt(
     JSON.stringify({
       merchant: tx.merchant,
@@ -143,7 +143,7 @@ export function insertTransaction(tx: Omit<Transaction, "encrypted_blob">): void
       currency: tx.currency,
       recurring: tx.recurring ?? false,
     }),
-    key
+    passphrase
   );
   getDb()
     .prepare(
@@ -152,9 +152,9 @@ export function insertTransaction(tx: Omit<Transaction, "encrypted_blob">): void
     .run(tx.id, tx.date, serializeEncrypted(blob));
 }
 
-function decryptBlob(encryptedBlob: string, key: Buffer): Record<string, unknown> {
+function decryptBlob(encryptedBlob: string, passphrase: string): Record<string, unknown> {
   const payload = deserializeEncrypted(encryptedBlob);
-  const decrypted = decrypt(payload, key);
+  const decrypted = decrypt(payload, passphrase);
   return JSON.parse(decrypted) as Record<string, unknown>;
 }
 
@@ -170,10 +170,10 @@ export function getTransactions(range?: { startDate?: string; endDate?: string }
     params.push(range.endDate);
   }
   sql += " ORDER BY date DESC";
-  const key = getEncryptionKey();
+  const passphrase = getPassphrase();
   const rows = getDb().prepare(sql).all(...params) as { id: string; date: string; encrypted_blob: string }[];
   return rows.map((r) => {
-    const payload = decryptBlob(r.encrypted_blob, key);
+    const payload = decryptBlob(r.encrypted_blob, passphrase);
     return {
       id: r.id,
       date: r.date,
@@ -334,7 +334,53 @@ export function exportVault(): {
   };
 }
 
+// --- Chat messages ---
+export interface ChatMessage {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  created_at: string;
+}
+
+export function insertChatMessage(msg: Omit<ChatMessage, "created_at">): void {
+  getDb()
+    .prepare(
+      `INSERT OR IGNORE INTO chat_sessions (id, summary, created_at) VALUES (?, ?, ?)`
+    )
+    .run(msg.id, `${msg.role}: ${msg.content.slice(0, 80)}`, new Date().toISOString());
+  // Store role + content in summary column since the table has no role/content cols.
+  // We encode as JSON in summary for simplicity.
+  getDb()
+    .prepare(`UPDATE chat_sessions SET summary = ? WHERE id = ?`)
+    .run(JSON.stringify({ role: msg.role, content: msg.content }), msg.id);
+}
+
+export function getChatMessages(limit = 100): ChatMessage[] {
+  const rows = getDb()
+    .prepare("SELECT id, summary, created_at FROM chat_sessions ORDER BY created_at ASC LIMIT ?")
+    .all(limit) as { id: string; summary: string; created_at: string }[];
+  return rows.flatMap((r) => {
+    try {
+      const parsed = JSON.parse(r.summary) as { role: "user" | "assistant"; content: string };
+      return [{ id: r.id, role: parsed.role, content: parsed.content, created_at: r.created_at }];
+    } catch {
+      return [];
+    }
+  });
+}
+
+export function clearChatHistory(): void {
+  getDb().prepare("DELETE FROM chat_sessions").run();
+}
+
 // --- Network audit ---
+export function logNetworkRequest(url: string, method = "POST"): void {
+  const { randomUUID } = require("node:crypto") as typeof import("node:crypto");
+  getDb()
+    .prepare("INSERT INTO network_audit (id, url, method, timestamp) VALUES (?, ?, ?, ?)")
+    .run(randomUUID(), url, method, new Date().toISOString());
+}
+
 export function getNetworkAudit(): { id: string; url: string; method: string; timestamp: string }[] {
   const rows = getDb().prepare("SELECT id, url, method, timestamp FROM network_audit ORDER BY timestamp DESC LIMIT 100").all() as { id: string; url: string; method: string; timestamp: string }[];
   return rows;
