@@ -5,6 +5,7 @@ const projectRoot = path.resolve(__dirname);
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  serverExternalPackages: ["better-sqlite3"],
   turbopack: { root: projectRoot },
   webpack: (config) => {
     // Lock context and resolution to vaultcfo so tailwindcss and other deps
