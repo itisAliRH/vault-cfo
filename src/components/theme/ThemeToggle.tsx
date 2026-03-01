@@ -15,7 +15,7 @@ export function ThemeToggle() {
     setMounted(true);
   }, []);
 
-  const current = theme ?? "system";
+  const current = (theme ?? "system") as (typeof THEMES)[number];
   const index = THEMES.indexOf(current);
   const nextIndex = (index + 1) % THEMES.length;
   const next = THEMES[nextIndex];
