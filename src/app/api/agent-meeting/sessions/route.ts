@@ -6,8 +6,6 @@ import {
   getAgentConfig,
 } from "@/lib/db";
 
-const ELEVENLABS_AGENT_CONFIG_KEY = "vaultcfo_convai_agent_id";
-
 export async function GET() {
   try {
     const meetings = getAgentMeetings();
@@ -24,7 +22,12 @@ export async function GET() {
 const PENDING_AGENT_ID = "pending";
 
 export async function POST() {
-  const agentId = getAgentConfig(ELEVENLABS_AGENT_CONFIG_KEY) ?? PENDING_AGENT_ID;
+  // Check both legacy key and face-specific keys (tina is the default face)
+  const agentId =
+    getAgentConfig("vaultcfo_convai_agent_id") ??
+    getAgentConfig("vaultcfo_convai_agent_id_tina") ??
+    getAgentConfig("vaultcfo_convai_agent_id_hank") ??
+    PENDING_AGENT_ID;
 
   try {
     const id = randomUUID();
