@@ -1,0 +1,15 @@
+CONTRACT SUMMARY – LexisNexis
+========================================
+
+Provider: LexisNexis
+Monthly cost: 149 EUR
+Renewal date: 2026-05-29
+Notice period: 45 days before renewal
+
+Key clauses:
+• Legal database access
+• 45-day notice
+• Auto-renewal
+
+---
+This is sample contract text for testing. Upload via Contracts → Upload contract (PDF or text).

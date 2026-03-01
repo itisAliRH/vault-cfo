@@ -1,0 +1,15 @@
+CONTRACT SUMMARY – EDF Energy
+========================================
+
+Provider: EDF Energy
+Monthly cost: 120 EUR
+Renewal date: 2026-04-29
+Notice period: 30 days before renewal
+
+Key clauses:
+• Fixed rate until renewal
+• Smart meter included
+• Renewable energy option
+
+---
+This is sample contract text for testing. Upload via Contracts → Upload contract (PDF or text).

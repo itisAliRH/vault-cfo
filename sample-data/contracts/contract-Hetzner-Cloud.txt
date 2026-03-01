@@ -1,0 +1,15 @@
+CONTRACT SUMMARY – Hetzner Cloud
+========================================
+
+Provider: Hetzner Cloud
+Monthly cost: 45 EUR
+Renewal date: 2027-03-01
+Notice period: 30 days before renewal
+
+Key clauses:
+• Monthly billing
+• Cancel with 30 days notice
+• 99.9% uptime SLA
+
+---
+This is sample contract text for testing. Upload via Contracts → Upload contract (PDF or text).
