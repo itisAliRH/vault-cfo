@@ -11,7 +11,9 @@ import {
 } from "./encryption";
 import type { Transaction, Contract, ContractFacts, UserProfile, Insight } from "@/types";
 
-const DATA_DIR = join(process.cwd(), "data");
+// On Vercel, process.cwd() is read-only; use /tmp so DB can be created (ephemeral per instance).
+const DATA_DIR =
+  process.env.VERCEL === "1" ? "/tmp/vaultcfo-data" : join(process.cwd(), "data");
 const DB_PATH = join(DATA_DIR, "vault.db");
 
 let db: Database.Database | null = null;
