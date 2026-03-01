@@ -113,6 +113,15 @@ function runMigrations(database: Database.Database) {
     CREATE INDEX IF NOT EXISTS idx_contract_facts_contract_id ON contract_facts(contract_id);
     CREATE INDEX IF NOT EXISTS idx_agent_meetings_created_at ON agent_meetings(created_at);
   `);
+  // Add new columns to agent_meetings if missing (migration)
+  const agentMeetingsInfo = database.prepare("PRAGMA table_info(agent_meetings)").all() as { name: string }[];
+  const columnNames = new Set(agentMeetingsInfo.map((c) => c.name));
+  if (!columnNames.has("sharing_config")) {
+    database.exec("ALTER TABLE agent_meetings ADD COLUMN sharing_config TEXT");
+  }
+  if (!columnNames.has("summary")) {
+    database.exec("ALTER TABLE agent_meetings ADD COLUMN summary TEXT");
+  }
 }
 
 // --- Users ---
@@ -434,22 +443,26 @@ export function getNetworkAudit(): { id: string; url: string; method: string; ti
 }
 
 // --- Agent meetings ---
+export type AgentMeetingStatus = "active" | "paused" | "ended";
+
 export interface AgentMeeting {
   id: string;
   title: string;
-  status: "active" | "ended";
+  status: AgentMeetingStatus;
   agent_id: string;
   transcript: string | null;
   created_at: string;
   ended_at: string | null;
   duration_seconds: number | null;
+  sharing_config: string | null;
+  summary: string | null;
 }
 
-export function insertAgentMeeting(meeting: Omit<AgentMeeting, "ended_at" | "duration_seconds"> & { ended_at?: string | null; duration_seconds?: number | null }): void {
+export function insertAgentMeeting(meeting: Omit<AgentMeeting, "ended_at" | "duration_seconds" | "sharing_config" | "summary"> & { ended_at?: string | null; duration_seconds?: number | null; sharing_config?: string | null; summary?: string | null }): void {
   getDb()
     .prepare(
-      `INSERT INTO agent_meetings (id, title, status, agent_id, transcript, created_at, ended_at, duration_seconds)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+      `INSERT INTO agent_meetings (id, title, status, agent_id, transcript, created_at, ended_at, duration_seconds, sharing_config, summary)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
     .run(
       meeting.id,
@@ -459,14 +472,16 @@ export function insertAgentMeeting(meeting: Omit<AgentMeeting, "ended_at" | "dur
       meeting.transcript ?? null,
       meeting.created_at,
       meeting.ended_at ?? null,
-      meeting.duration_seconds ?? null
+      meeting.duration_seconds ?? null,
+      meeting.sharing_config ?? null,
+      meeting.summary ?? null
     );
 }
 
 export function getAgentMeetings(): AgentMeeting[] {
   const rows = getDb()
     .prepare(
-      "SELECT id, title, status, agent_id, transcript, created_at, ended_at, duration_seconds FROM agent_meetings ORDER BY created_at DESC"
+      "SELECT id, title, status, agent_id, transcript, created_at, ended_at, duration_seconds, sharing_config, summary FROM agent_meetings ORDER BY created_at DESC"
     )
     .all() as {
     id: string;
@@ -477,23 +492,27 @@ export function getAgentMeetings(): AgentMeeting[] {
     created_at: string;
     ended_at: string | null;
     duration_seconds: number | null;
+    sharing_config?: string | null;
+    summary?: string | null;
   }[];
   return rows.map((r) => ({
     id: r.id,
     title: r.title,
-    status: r.status as "active" | "ended",
+    status: r.status as AgentMeetingStatus,
     agent_id: r.agent_id,
     transcript: r.transcript,
     created_at: r.created_at,
     ended_at: r.ended_at,
     duration_seconds: r.duration_seconds,
+    sharing_config: r.sharing_config ?? null,
+    summary: r.summary ?? null,
   }));
 }
 
 export function getAgentMeeting(id: string): AgentMeeting | null {
   const row = getDb()
     .prepare(
-      "SELECT id, title, status, agent_id, transcript, created_at, ended_at, duration_seconds FROM agent_meetings WHERE id = ?"
+      "SELECT id, title, status, agent_id, transcript, created_at, ended_at, duration_seconds, sharing_config, summary FROM agent_meetings WHERE id = ?"
     )
     .get(id) as {
     id: string;
@@ -504,23 +523,34 @@ export function getAgentMeeting(id: string): AgentMeeting | null {
     created_at: string;
     ended_at: string | null;
     duration_seconds: number | null;
+    sharing_config?: string | null;
+    summary?: string | null;
   } | undefined;
   if (!row) return null;
   return {
     id: row.id,
     title: row.title,
-    status: row.status as "active" | "ended",
+    status: row.status as AgentMeetingStatus,
     agent_id: row.agent_id,
     transcript: row.transcript,
     created_at: row.created_at,
     ended_at: row.ended_at,
     duration_seconds: row.duration_seconds,
+    sharing_config: row.sharing_config ?? null,
+    summary: row.summary ?? null,
   };
 }
 
 export function updateAgentMeeting(
   id: string,
-  updates: { status?: "active" | "ended"; transcript?: string | null; ended_at?: string | null; duration_seconds?: number | null }
+  updates: {
+    status?: AgentMeetingStatus;
+    transcript?: string | null;
+    ended_at?: string | null;
+    duration_seconds?: number | null;
+    sharing_config?: string | null;
+    summary?: string | null;
+  }
 ): void {
   const meeting = getAgentMeeting(id);
   if (!meeting) return;
@@ -528,11 +558,13 @@ export function updateAgentMeeting(
   const transcript = updates.transcript !== undefined ? updates.transcript : meeting.transcript;
   const ended_at = updates.ended_at !== undefined ? updates.ended_at : meeting.ended_at;
   const duration_seconds = updates.duration_seconds !== undefined ? updates.duration_seconds : meeting.duration_seconds;
+  const sharing_config = updates.sharing_config !== undefined ? updates.sharing_config : meeting.sharing_config;
+  const summary = updates.summary !== undefined ? updates.summary : meeting.summary;
   getDb()
     .prepare(
-      "UPDATE agent_meetings SET status = ?, transcript = ?, ended_at = ?, duration_seconds = ? WHERE id = ?"
+      "UPDATE agent_meetings SET status = ?, transcript = ?, ended_at = ?, duration_seconds = ?, sharing_config = ?, summary = ? WHERE id = ?"
     )
-    .run(status, transcript, ended_at, duration_seconds, id);
+    .run(status, transcript, ended_at, duration_seconds, sharing_config, summary, id);
 }
 
 export function deleteAgentMeeting(id: string): void {
