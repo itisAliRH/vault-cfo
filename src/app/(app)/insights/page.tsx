@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { TimeRangeSelector } from "@/components/charts/TimeRangeSelector";
 import type { BudgetSummary } from "@/lib/analytics/budget";
 import type { SpendingSpike } from "@/lib/analytics/spikes";
 import type { Subscription } from "@/lib/analytics/subscriptions";
@@ -19,19 +21,25 @@ function fmt(n: number) {
 export default function InsightsPage() {
   const [data, setData] = useState<InsightsData | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [months, setMonths] = useState(6);
 
   useEffect(() => {
-    fetch("/api/insights?months=6")
+    setData(null);
+    setError(null);
+    fetch(`/api/insights?months=${months}`)
       .then((r) => r.json())
       .then((d) => setData(d as InsightsData))
       .catch(() => setError("Failed to load insights."));
-  }, []);
+  }, [months]);
 
   return (
     <div className="container max-w-6xl mx-auto space-y-8 px-6 py-8">
-      <div className="space-y-2">
-        <h1 className="font-pixel text-2xl text-foreground">Insights</h1>
-        <p className="text-muted-foreground text-sm">AI-powered analysis of your last 6 months.</p>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="space-y-2">
+          <h1 className="font-pixel text-2xl text-foreground">Insights</h1>
+          <p className="text-muted-foreground text-sm">AI-powered analysis of your finances.</p>
+        </div>
+        <TimeRangeSelector value={months} onChange={setMonths} />
       </div>
 
       {error && (
@@ -39,7 +47,11 @@ export default function InsightsPage() {
       )}
 
       {!data && !error && (
-        <p className="text-muted-foreground text-sm animate-pulse">Loading…</p>
+        <div className="grid gap-6">
+          <Skeleton className="h-48 w-full rounded-xl" />
+          <Skeleton className="h-36 w-full rounded-xl" />
+          <Skeleton className="h-36 w-full rounded-xl" />
+        </div>
       )}
 
       {data && (
