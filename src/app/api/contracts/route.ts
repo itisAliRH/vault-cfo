@@ -6,7 +6,7 @@ import {
   getAllContractsWithFacts,
 } from "@/lib/db";
 import { extractTextFromPDF } from "@/lib/ingest/pdf";
-import { extractContractFacts } from "@/lib/ingest/contract-extract";
+import { getCachedContractFacts } from "@/lib/ingest/contract-extract";
 
 export async function GET() {
   try {
@@ -55,11 +55,11 @@ export async function POST(request: NextRequest) {
     const id = randomUUID();
     insertContract({ id, filename, raw_text_hash: undefined });
 
-    let facts: Awaited<ReturnType<typeof extractContractFacts>>;
+    let facts: Awaited<ReturnType<typeof getCachedContractFacts>>;
     try {
-      facts = await extractContractFacts(text);
+      facts = await getCachedContractFacts(text);
     } catch (err) {
-      console.error("extractContractFacts failed, using fallback:", err);
+      console.error("getCachedContractFacts failed, using fallback:", err);
       facts = {
         provider_name: "Unknown",
         monthly_cost: 0,
