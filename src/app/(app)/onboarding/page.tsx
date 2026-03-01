@@ -11,7 +11,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { SectionPill } from "@/components/docs/SectionPill";
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 import type { UserProfile } from "@/types";
@@ -49,7 +48,27 @@ export default function OnboardingPage() {
         }),
       });
       if (!res.ok) {
-        const errBody = (await res.json().catch(() => ({}))) as { error?: string; hint?: string };
+        const errBody = (await res.json().catch(() => ({}))) as {
+          error?: string;
+          hint?: string;
+          debug?: { message: string; name: string };
+        };
+        // #region agent log
+        if (errBody.debug) {
+          fetch("http://127.0.0.1:7524/ingest/0bfddef5-e779-4680-895c-1765323b8807", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "1cc13d" },
+            body: JSON.stringify({
+              sessionId: "1cc13d",
+              location: "onboarding/page.tsx:handleSubmit:errBody",
+              message: "API error response with debug",
+              data: errBody.debug,
+              hypothesisId: "E",
+              timestamp: Date.now(),
+            }),
+          }).catch(() => {});
+        }
+        // #endregion
         const msg = errBody.hint ? `${errBody.error ?? "Failed to save"} ${errBody.hint}` : (errBody.error ?? "Failed to save");
         throw new Error(msg);
       }
@@ -62,15 +81,20 @@ export default function OnboardingPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-10 px-6 py-10">
       <div className="space-y-2">
-        <SectionPill label="ONBOARDING" sectionId="onboarding" />
-        <h1 className="font-pixel text-2xl text-foreground">Setup</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="font-pixel text-2xl text-foreground">
+            {step === 1 ? "Welcome to VaultCFO" : "Setup"}
+          </h1>
+          <span className="font-pixel text-xs text-muted-foreground">STEP {step}/3</span>
+        </div>
       </div>
 
       {step === 1 && (
-        <Card className="rounded-xl border border-border bg-card transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5">
+        <Card className="rounded-xl border border-border bg-card transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 dark:border-white/20">
           <CardHeader>
             <CardTitle className="font-pixel text-sm">Financial literacy</CardTitle>
             <CardDescription className="text-muted-foreground text-base">How comfortable are you with finance?</CardDescription>
+            <p className="text-sm text-muted-foreground mt-1">This controls how technical the AI speaks to you. You can change it later in Settings.</p>
           </CardHeader>
           <CardContent className="flex flex-col gap-2">
             {LITERACY_OPTIONS.map((opt) => (
@@ -81,8 +105,8 @@ export default function OnboardingPage() {
                 className={cn(
                   "min-w-0 w-full rounded-lg border-2 p-4 h-auto text-left text-sm transition-colors font-pixel justify-start whitespace-normal break-words",
                   literacyLevel === opt.value
-                    ? "border-primary bg-primary/20 text-primary-foreground"
-                    : "border-border text-foreground hover:border-muted-foreground/50 hover:bg-muted/30"
+                    ? "border-primary bg-primary/20 text-foreground hover:text-foreground ring-2 ring-primary/40 dark:ring-primary/50"
+                    : "border-foreground/50 text-foreground hover:text-foreground hover:border-foreground/80 hover:bg-muted/30 dark:border-white/40 dark:hover:border-white/70"
                 )}
                 onClick={() => setLiteracyLevel(opt.value)}
               >
@@ -103,17 +127,22 @@ export default function OnboardingPage() {
       )}
 
       {step === 2 && (
-        <Card className="rounded-xl border border-border bg-card transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5">
+        <Card className="rounded-xl border border-border bg-card transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 dark:border-white/20">
           <CardHeader>
             <CardTitle className="font-pixel text-sm">Insight style</CardTitle>
             <CardDescription className="text-muted-foreground text-base">How would you like insights?</CardDescription>
+            <p className="text-sm text-muted-foreground mt-1">Simple tips = actionable one-liners; Deep analytics = detailed breakdowns with projections and comparisons.</p>
           </CardHeader>
           <CardContent className="flex gap-4">
             {INSIGHT_OPTIONS.map((opt) => (
               <Button
                 key={opt.value}
                 variant={insightStyle === opt.value ? "default" : "outline"}
-                className="font-pixel text-xs"
+                className={cn(
+                  "font-pixel text-xs",
+                  insightStyle === opt.value && "ring-2 ring-primary/40 dark:ring-primary/50",
+                  insightStyle !== opt.value && "dark:border-white/40 dark:hover:border-white/70"
+                )}
                 onClick={() => setInsightStyle(opt.value)}
               >
                 {opt.label}
@@ -136,13 +165,14 @@ export default function OnboardingPage() {
       )}
 
       {step === 3 && (
-        <Card className="rounded-xl border border-border bg-card transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5">
+        <Card className="rounded-xl border border-border bg-card transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 dark:border-white/20">
           <CardHeader>
             <CardTitle className="font-pixel text-sm">Privacy</CardTitle>
             <CardDescription className="text-muted-foreground text-base">Your data stays local by default.</CardDescription>
+            <p className="text-sm text-muted-foreground mt-1">VaultCFO runs entirely locally by default. Enabling online tools lets the AI search current rates — only when you explicitly ask.</p>
           </CardHeader>
           <CardContent>
-            <Label className="flex cursor-pointer items-center gap-3 rounded-lg border-2 border-border p-4 text-foreground font-pixel text-sm hover:bg-muted/50">
+            <Label className="flex cursor-pointer items-center gap-3 rounded-lg border-2 border-foreground/50 p-4 text-foreground font-pixel text-sm hover:border-foreground/80 hover:bg-muted/50 dark:border-white/40 dark:hover:border-white/70">
               <input
                 type="checkbox"
                 checked={onlineConsent}
