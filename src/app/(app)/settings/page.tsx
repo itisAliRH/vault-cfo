@@ -175,7 +175,6 @@ export default function SettingsPage() {
   return (
     <div className="container max-w-6xl mx-auto space-y-10 px-6 py-8">
       <div className="space-y-2">
-        <SectionPill label="SETTINGS" sectionId="settings" copyLink />
         <h1 className="font-pixel text-2xl text-foreground">Settings</h1>
       </div>
 
