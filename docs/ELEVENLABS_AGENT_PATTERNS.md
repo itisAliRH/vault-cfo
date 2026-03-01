@@ -1,6 +1,6 @@
 # ElevenLabs agent/session patterns (inspired by discens-app)
 
-Reference: [discens-app](https://github.com/alireza/discens-app) — working dynamic agents and voice sessions.
+Reference: [discens-app](https://github.com/itisAliRH/discens) — working dynamic agents and voice sessions.
 
 ## How discens uses ElevenLabs
 
