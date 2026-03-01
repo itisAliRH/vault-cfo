@@ -113,10 +113,13 @@ export default function DashboardPage() {
         body: JSON.stringify({ preset }),
       });
       if (!res.ok) throw new Error("Failed to generate demo data");
-
-      const res2 = await fetch("/api/insights?months=6");
-      const json = await res2.json();
-      if (json?.budget) setData(json as InsightsData);
+      const json = (await res.json()) as { insights?: InsightsData };
+      if (json?.insights?.budget) setData(json.insights);
+      else {
+        const res2 = await fetch("/api/insights?months=6");
+        const insightsJson = await res2.json();
+        if (insightsJson?.budget) setData(insightsJson as InsightsData);
+      }
       toast({
         title: "Demo data loaded",
         description: "Sample transactions and contracts have been imported.",
