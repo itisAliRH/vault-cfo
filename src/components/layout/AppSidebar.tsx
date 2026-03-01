@@ -23,6 +23,12 @@ import {
   SidebarFooter,
   SidebarHeader,
 } from "@/components/ui/sidebar";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const navItems = [
   { href: "/", label: "Home", icon: Home },
@@ -100,25 +106,55 @@ function StatusBar() {
   }, []);
 
   return (
-    <div className="flex flex-wrap gap-2 p-2">
-      <span className="rounded border border-accent bg-accent/10 px-1.5 py-0.5 font-pixel text-[10px] text-accent">
-        LOCAL MODE
-      </span>
-      {onlineConsent && (
-        <span className="rounded border border-secondary bg-secondary/20 px-1.5 py-0.5 font-pixel text-[10px] text-secondary">
-          ONLINE TOOLS ENABLED
-        </span>
-      )}
-      {perf?.status === "ok" && perf.gpu_name && perf.gpu_name !== "Mistral backend" && (
-        <span className="rounded border border-accent bg-accent/10 px-1.5 py-0.5 font-pixel text-[10px] text-accent">
-          NVIDIA GPU
-        </span>
-      )}
-      {perf?.status === "ok" && (
-        <span className="rounded border border-accent bg-accent/10 px-1.5 py-0.5 font-pixel text-[10px] text-accent">
-          AI READY
-        </span>
-      )}
-    </div>
+    <TooltipProvider delayDuration={300}>
+      <div className="flex flex-wrap gap-2 p-2">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className="cursor-default rounded border border-accent bg-accent/10 px-1.5 py-0.5 font-pixel text-[10px] text-accent">
+              LOCAL MODE
+            </span>
+          </TooltipTrigger>
+          <TooltipContent side="top">
+            <p className="font-pixel text-[10px]">All data stays on your device</p>
+          </TooltipContent>
+        </Tooltip>
+        {onlineConsent && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="cursor-default rounded border border-secondary bg-secondary/20 px-1.5 py-0.5 font-pixel text-[10px] text-secondary">
+                ONLINE TOOLS
+              </span>
+            </TooltipTrigger>
+            <TooltipContent side="top">
+              <p className="font-pixel text-[10px]">AI can use web search when you ask. Change in Settings</p>
+            </TooltipContent>
+          </Tooltip>
+        )}
+        {perf?.status === "ok" && perf.gpu_name && perf.gpu_name !== "Mistral backend" && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="cursor-default rounded border border-accent bg-accent/10 px-1.5 py-0.5 font-pixel text-[10px] text-accent">
+                GPU
+              </span>
+            </TooltipTrigger>
+            <TooltipContent side="top">
+              <p className="font-pixel text-[10px]">Local NVIDIA GPU used for faster inference</p>
+            </TooltipContent>
+          </Tooltip>
+        )}
+        {perf?.status === "ok" && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="cursor-default rounded border border-accent bg-accent/10 px-1.5 py-0.5 font-pixel text-[10px] text-accent">
+                AI READY
+              </span>
+            </TooltipTrigger>
+            <TooltipContent side="top">
+              <p className="font-pixel text-[10px]">AI backend connected and responding</p>
+            </TooltipContent>
+          </Tooltip>
+        )}
+      </div>
+    </TooltipProvider>
   );
 }
