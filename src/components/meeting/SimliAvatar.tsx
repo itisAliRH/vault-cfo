@@ -1,6 +1,13 @@
 "use client";
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { SimliClient, LogLevel } from "simli-client";
 
 type TranscriptEntry = { role: "user" | "agent"; text: string };
@@ -74,6 +81,7 @@ export function SimliAvatar({
   const transcriptRef = useRef<TranscriptEntry[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isLive, setIsLive] = useState(false);
+  const [showEndConfirm, setShowEndConfirm] = useState(false);
 
   const reportTranscript = useCallback(() => {
     if (onTranscript && transcriptRef.current.length > 0) {
@@ -295,14 +303,19 @@ export function SimliAvatar({
   }, [agentId, faceIdProp, connectElevenLabs, onStatusChange]);
 
   const handleStop = useCallback(() => {
-    if (wsRef.current) {
-      wsRef.current.close();
-      wsRef.current = null;
-    }
+    // Stop voice capture first so no more audio is sent
     stopVoiceStream();
-    if (simliRef.current) {
-      simliRef.current.stop().catch(() => {});
-      simliRef.current = null;
+    // Stop SimliClient before closing the WS so it can send its final message
+    const simli = simliRef.current;
+    simliRef.current = null;
+    const ws = wsRef.current;
+    wsRef.current = null;
+    if (simli) {
+      simli.stop().catch(() => {}).finally(() => {
+        ws?.close();
+      });
+    } else {
+      ws?.close();
     }
     setIsLive(false);
     onStatusChange?.("disconnected");
@@ -311,9 +324,16 @@ export function SimliAvatar({
 
   useEffect(() => {
     return () => {
-      if (wsRef.current) wsRef.current.close();
       stopVoiceStream();
-      simliRef.current?.stop().catch(() => {});
+      const simli = simliRef.current;
+      simliRef.current = null;
+      const ws = wsRef.current;
+      wsRef.current = null;
+      if (simli) {
+        simli.stop().catch(() => {}).finally(() => ws?.close());
+      } else {
+        ws?.close();
+      }
     };
   }, [stopVoiceStream]);
 
@@ -359,20 +379,45 @@ export function SimliAvatar({
             type="button"
             onClick={handleStart}
             disabled={!!error}
-            className="px-4 py-2 rounded-lg bg-orange-500 text-white text-sm font-medium hover:bg-orange-600 disabled:opacity-50"
+            className="px-4 py-2 rounded-lg bg-orange-500 text-white text-sm font-medium font-pixel hover:bg-orange-600 disabled:opacity-50"
           >
             Start meeting
           </button>
         ) : (
           <button
             type="button"
-            onClick={handleStop}
-            className="px-4 py-2 rounded-lg border border-border bg-background text-sm font-medium hover:bg-muted"
+            onClick={() => setShowEndConfirm(true)}
+            className="px-4 py-2 rounded-lg border border-destructive bg-destructive/10 text-destructive text-sm font-medium font-pixel hover:bg-destructive/20"
           >
             End meeting
           </button>
         )}
       </div>
+
+      <Dialog open={showEndConfirm} onOpenChange={setShowEndConfirm}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="font-pixel text-sm">End the meeting?</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">The conversation will be saved and you&apos;ll return to the meeting list.</p>
+          <div className="flex gap-2 pt-2">
+            <Button
+              variant="destructive"
+              className="font-pixel text-xs"
+              onClick={() => { setShowEndConfirm(false); handleStop(); }}
+            >
+              End meeting
+            </Button>
+            <Button
+              variant="ghost"
+              className="font-pixel text-xs"
+              onClick={() => setShowEndConfirm(false)}
+            >
+              Continue
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
