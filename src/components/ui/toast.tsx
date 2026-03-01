@@ -25,6 +25,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // Mount guard for createPortal target
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- portal requires mounted DOM
     setMounted(true);
   }, []);
 

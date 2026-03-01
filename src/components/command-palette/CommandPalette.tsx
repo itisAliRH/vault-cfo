@@ -82,6 +82,8 @@ export function CommandPalette({
   }, [open, filtered, selectedIndex, select, onOpenChange]);
 
   useEffect(() => {
+    // Reset selection when search query changes
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional reset on query change
     setSelectedIndex(0);
   }, [query]);
 

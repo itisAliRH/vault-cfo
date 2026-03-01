@@ -12,6 +12,8 @@ export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
 
   useEffect(() => {
+    // Hydration guard: avoid theme mismatch on first paint (next-themes pattern)
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- mounted guard is intentional
     setMounted(true);
   }, []);
 

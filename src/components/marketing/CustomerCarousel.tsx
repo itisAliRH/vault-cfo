@@ -82,7 +82,7 @@ export function CustomerCarousel() {
                 <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-muted font-pixel text-lg text-muted-foreground">
                   {customer.logo}
                 </div>
-                <p className="text-foreground text-sm mb-2">"{customer.quote}"</p>
+                <p className="text-foreground text-sm mb-2">&ldquo;{customer.quote}&rdquo;</p>
                 <p className="font-pixel text-xs text-muted-foreground uppercase tracking-wider">
                   {customer.industry}
                 </p>

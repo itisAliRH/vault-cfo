@@ -10,6 +10,7 @@ import {
   MessageSquare,
   Settings,
   Home,
+  Video,
 } from "lucide-react";
 import {
   Sidebar,
@@ -29,6 +30,7 @@ const navItems = [
   { href: "/contracts", label: "Contracts", icon: FileText },
   { href: "/insights", label: "Insights", icon: Lightbulb },
   { href: "/chat", label: "Agent Chat", icon: MessageSquare },
+  { href: "/agent-meeting", label: "Agent Meeting", icon: Video },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
