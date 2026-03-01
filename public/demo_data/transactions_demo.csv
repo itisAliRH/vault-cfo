@@ -1,97 +1,97 @@
 date,amount,merchant,category
-2024-09-01,3200.00,Employer Inc,Income
-2024-09-02,-850.00,Rent Co,Rent
-2024-09-05,-120.00,Supermarket,Groceries
-2024-09-07,-15.99,Netflix,Subscriptions
-2024-09-08,-9.99,Spotify,Subscriptions
-2024-09-10,-45.00,Insurance Plus,Insurance
-2024-09-12,-65.00,Telecom France,Telecom
-2024-09-14,-85.00,Restaurant,Groceries
-2024-09-16,-42.00,Supermarket,Groceries
-2024-09-18,-12.99,Disney+,Subscriptions
-2024-09-20,-38.00,Pharmacy,Health
-2024-09-22,-120.00,Supermarket,Groceries
-2024-09-24,-28.00,Cafe,Groceries
-2024-09-26,-55.00,Insurance Plus,Insurance
-2024-09-28,-200.00,Electric Co,Utilities
-2024-09-30,-18.00,Streaming Co,Subscriptions
-2024-10-01,3200.00,Employer Inc,Income
-2024-10-02,-850.00,Rent Co,Rent
-2024-10-04,-135.00,Supermarket,Groceries
-2024-10-06,-15.99,Netflix,Subscriptions
-2024-10-07,-9.99,Spotify,Subscriptions
-2024-10-09,-45.00,Insurance Plus,Insurance
-2024-10-11,-65.00,Telecom France,Telecom
-2024-10-13,-92.00,Restaurant,Groceries
-2024-10-15,-48.00,Supermarket,Groceries
-2024-10-17,-12.99,Disney+,Subscriptions
-2024-10-19,-35.00,Pharmacy,Health
-2024-10-21,-115.00,Supermarket,Groceries
-2024-10-23,-22.00,Cafe,Groceries
-2024-10-25,-55.00,Insurance Plus,Insurance
-2024-10-27,-195.00,Electric Co,Utilities
-2024-10-29,-18.00,Streaming Co,Subscriptions
-2024-11-01,3200.00,Employer Inc,Income
-2024-11-02,-850.00,Rent Co,Rent
-2024-11-04,-142.00,Supermarket,Groceries
-2024-11-06,-15.99,Netflix,Subscriptions
-2024-11-07,-9.99,Spotify,Subscriptions
-2024-11-09,-45.00,Insurance Plus,Insurance
-2024-11-11,-65.00,Telecom France,Telecom
-2024-11-13,-78.00,Restaurant,Groceries
-2024-11-15,-52.00,Supermarket,Groceries
-2024-11-17,-12.99,Disney+,Subscriptions
-2024-11-19,-41.00,Pharmacy,Health
-2024-11-21,-128.00,Supermarket,Groceries
-2024-11-23,-30.00,Cafe,Groceries
-2024-11-25,-55.00,Insurance Plus,Insurance
-2024-11-27,-210.00,Electric Co,Utilities
-2024-11-28,-18.00,Streaming Co,Subscriptions
-2024-12-01,3200.00,Employer Inc,Income
-2024-12-02,-850.00,Rent Co,Rent
-2024-12-04,-165.00,Supermarket,Groceries
-2024-12-06,-15.99,Netflix,Subscriptions
-2024-12-07,-9.99,Spotify,Subscriptions
-2024-12-09,-45.00,Insurance Plus,Insurance
-2024-12-11,-65.00,Telecom France,Telecom
-2024-12-13,-95.00,Restaurant,Groceries
-2024-12-15,-88.00,Supermarket,Groceries
-2024-12-17,-12.99,Disney+,Subscriptions
-2024-12-19,-38.00,Pharmacy,Health
-2024-12-21,-155.00,Supermarket,Groceries
-2024-12-23,-45.00,Cafe,Groceries
-2024-12-25,-55.00,Insurance Plus,Insurance
-2024-12-27,-220.00,Electric Co,Utilities
-2024-12-29,-18.00,Streaming Co,Subscriptions
-2025-01-01,3200.00,Employer Inc,Income
-2025-01-02,-850.00,Rent Co,Rent
-2025-01-04,-118.00,Supermarket,Groceries
-2025-01-06,-15.99,Netflix,Subscriptions
-2025-01-07,-9.99,Spotify,Subscriptions
-2025-01-09,-45.00,Insurance Plus,Insurance
-2025-01-11,-65.00,Telecom France,Telecom
-2025-01-13,-72.00,Restaurant,Groceries
-2025-01-15,-55.00,Supermarket,Groceries
-2025-01-17,-12.99,Disney+,Subscriptions
-2025-01-19,-32.00,Pharmacy,Health
-2025-01-21,-125.00,Supermarket,Groceries
-2025-01-23,-25.00,Cafe,Groceries
-2025-01-25,-55.00,Insurance Plus,Insurance
-2025-01-27,-205.00,Electric Co,Utilities
-2025-01-29,-18.00,Streaming Co,Subscriptions
-2025-02-01,3200.00,Employer Inc,Income
-2025-02-02,-850.00,Rent Co,Rent
-2025-02-04,-132.00,Supermarket,Groceries
-2025-02-06,-15.99,Netflix,Subscriptions
-2025-02-07,-9.99,Spotify,Subscriptions
-2025-02-09,-45.00,Insurance Plus,Insurance
-2025-02-11,-65.00,Telecom France,Telecom
-2025-02-13,-88.00,Restaurant,Groceries
-2025-02-15,-48.00,Supermarket,Groceries
-2025-02-17,-12.99,Disney+,Subscriptions
-2025-02-19,-40.00,Pharmacy,Health
-2025-02-21,-118.00,Supermarket,Groceries
-2025-02-23,-28.00,Cafe,Groceries
-2025-02-25,-55.00,Insurance Plus,Insurance
-2025-02-27,-198.00,Electric Co,Utilities
-2025-02-28,-18.00,Streaming Co,Subscriptions
+2025-09-01,3200.00,Employer Inc,Income
+2025-09-02,-850.00,Rent Co,Rent
+2025-09-05,-120.00,Supermarket,Groceries
+2025-09-07,-15.99,Netflix,Subscriptions
+2025-09-08,-9.99,Spotify,Subscriptions
+2025-09-10,-45.00,Insurance Plus,Insurance
+2025-09-12,-65.00,Telecom France,Telecom
+2025-09-14,-85.00,Restaurant,Groceries
+2025-09-16,-42.00,Supermarket,Groceries
+2025-09-18,-12.99,Disney+,Subscriptions
+2025-09-20,-38.00,Pharmacy,Health
+2025-09-22,-120.00,Supermarket,Groceries
+2025-09-24,-28.00,Cafe,Groceries
+2025-09-26,-55.00,Insurance Plus,Insurance
+2025-09-28,-200.00,Electric Co,Utilities
+2025-09-30,-18.00,Streaming Co,Subscriptions
+2025-10-01,3200.00,Employer Inc,Income
+2025-10-02,-850.00,Rent Co,Rent
+2025-10-04,-135.00,Supermarket,Groceries
+2025-10-06,-15.99,Netflix,Subscriptions
+2025-10-07,-9.99,Spotify,Subscriptions
+2025-10-09,-45.00,Insurance Plus,Insurance
+2025-10-11,-65.00,Telecom France,Telecom
+2025-10-13,-92.00,Restaurant,Groceries
+2025-10-15,-48.00,Supermarket,Groceries
+2025-10-17,-12.99,Disney+,Subscriptions
+2025-10-19,-35.00,Pharmacy,Health
+2025-10-21,-115.00,Supermarket,Groceries
+2025-10-23,-22.00,Cafe,Groceries
+2025-10-25,-55.00,Insurance Plus,Insurance
+2025-10-27,-195.00,Electric Co,Utilities
+2025-10-29,-18.00,Streaming Co,Subscriptions
+2025-11-01,3200.00,Employer Inc,Income
+2025-11-02,-850.00,Rent Co,Rent
+2025-11-04,-142.00,Supermarket,Groceries
+2025-11-06,-15.99,Netflix,Subscriptions
+2025-11-07,-9.99,Spotify,Subscriptions
+2025-11-09,-45.00,Insurance Plus,Insurance
+2025-11-11,-65.00,Telecom France,Telecom
+2025-11-13,-78.00,Restaurant,Groceries
+2025-11-15,-52.00,Supermarket,Groceries
+2025-11-17,-12.99,Disney+,Subscriptions
+2025-11-19,-41.00,Pharmacy,Health
+2025-11-21,-128.00,Supermarket,Groceries
+2025-11-23,-30.00,Cafe,Groceries
+2025-11-25,-55.00,Insurance Plus,Insurance
+2025-11-27,-210.00,Electric Co,Utilities
+2025-11-28,-18.00,Streaming Co,Subscriptions
+2025-12-01,3200.00,Employer Inc,Income
+2025-12-02,-850.00,Rent Co,Rent
+2025-12-04,-165.00,Supermarket,Groceries
+2025-12-06,-15.99,Netflix,Subscriptions
+2025-12-07,-9.99,Spotify,Subscriptions
+2025-12-09,-45.00,Insurance Plus,Insurance
+2025-12-11,-65.00,Telecom France,Telecom
+2025-12-13,-95.00,Restaurant,Groceries
+2025-12-15,-88.00,Supermarket,Groceries
+2025-12-17,-12.99,Disney+,Subscriptions
+2025-12-19,-38.00,Pharmacy,Health
+2025-12-21,-155.00,Supermarket,Groceries
+2025-12-23,-45.00,Cafe,Groceries
+2025-12-25,-55.00,Insurance Plus,Insurance
+2025-12-27,-220.00,Electric Co,Utilities
+2025-12-29,-18.00,Streaming Co,Subscriptions
+2026-01-01,3200.00,Employer Inc,Income
+2026-01-02,-850.00,Rent Co,Rent
+2026-01-04,-118.00,Supermarket,Groceries
+2026-01-06,-15.99,Netflix,Subscriptions
+2026-01-07,-9.99,Spotify,Subscriptions
+2026-01-09,-45.00,Insurance Plus,Insurance
+2026-01-11,-65.00,Telecom France,Telecom
+2026-01-13,-72.00,Restaurant,Groceries
+2026-01-15,-55.00,Supermarket,Groceries
+2026-01-17,-12.99,Disney+,Subscriptions
+2026-01-19,-32.00,Pharmacy,Health
+2026-01-21,-125.00,Supermarket,Groceries
+2026-01-23,-25.00,Cafe,Groceries
+2026-01-25,-55.00,Insurance Plus,Insurance
+2026-01-27,-205.00,Electric Co,Utilities
+2026-01-29,-18.00,Streaming Co,Subscriptions
+2026-02-01,3200.00,Employer Inc,Income
+2026-02-02,-850.00,Rent Co,Rent
+2026-02-04,-132.00,Supermarket,Groceries
+2026-02-06,-15.99,Netflix,Subscriptions
+2026-02-07,-9.99,Spotify,Subscriptions
+2026-02-09,-45.00,Insurance Plus,Insurance
+2026-02-11,-65.00,Telecom France,Telecom
+2026-02-13,-88.00,Restaurant,Groceries
+2026-02-15,-48.00,Supermarket,Groceries
+2026-02-17,-12.99,Disney+,Subscriptions
+2026-02-19,-40.00,Pharmacy,Health
+2026-02-21,-118.00,Supermarket,Groceries
+2026-02-23,-28.00,Cafe,Groceries
+2026-02-25,-55.00,Insurance Plus,Insurance
+2026-02-27,-198.00,Electric Co,Utilities
+2026-02-28,-18.00,Streaming Co,Subscriptions
