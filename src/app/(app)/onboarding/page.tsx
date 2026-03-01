@@ -48,27 +48,7 @@ export default function OnboardingPage() {
         }),
       });
       if (!res.ok) {
-        const errBody = (await res.json().catch(() => ({}))) as {
-          error?: string;
-          hint?: string;
-          debug?: { message: string; name: string };
-        };
-        // #region agent log
-        if (errBody.debug) {
-          fetch("http://127.0.0.1:7524/ingest/0bfddef5-e779-4680-895c-1765323b8807", {
-            method: "POST",
-            headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "1cc13d" },
-            body: JSON.stringify({
-              sessionId: "1cc13d",
-              location: "onboarding/page.tsx:handleSubmit:errBody",
-              message: "API error response with debug",
-              data: errBody.debug,
-              hypothesisId: "E",
-              timestamp: Date.now(),
-            }),
-          }).catch(() => {});
-        }
-        // #endregion
+        const errBody = (await res.json().catch(() => ({}))) as { error?: string; hint?: string };
         const msg = errBody.hint ? `${errBody.error ?? "Failed to save"} ${errBody.hint}` : (errBody.error ?? "Failed to save");
         throw new Error(msg);
       }
