@@ -1,0 +1,260 @@
+"use client";
+
+import { Suspense, use, useCallback, useEffect, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { SimliAvatar } from "@/components/meeting/SimliAvatar";
+import {
+  MeetingTranscript,
+  type TranscriptEntry,
+} from "@/components/meeting/MeetingTranscript";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
+import { SIMLI_FACE_IDS, SIMLI_FACE_LABELS } from "@/lib/simli";
+import { cn } from "@/lib/utils";
+
+type ConnectionStatus = "connecting" | "connected" | "disconnected" | "error";
+
+type FaceChoice = keyof typeof SIMLI_FACE_IDS;
+const FACE_OPTIONS: FaceChoice[] = ["tina", "hank"];
+
+type PageProps = { params: Promise<{ id: string }> };
+
+export default function AgentMeetingSessionPage({ params }: PageProps) {
+  return (
+    <Suspense>
+      <AgentMeetingSessionInner params={params} />
+    </Suspense>
+  );
+}
+
+function AgentMeetingSessionInner({ params }: PageProps) {
+  const { id } = use(params);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const autoStart = searchParams.get("auto") === "1";
+  // "pending" = API keys missing, null = loading, string = valid session token
+  const [sessionStatus, setSessionStatus] = useState<string | null>(null);
+  const [sessionError, setSessionError] = useState<string | null>(null);
+  const [transcript, setTranscript] = useState<TranscriptEntry[]>([]);
+  const [status, setStatus] = useState<ConnectionStatus>("disconnected");
+  const [startedAt, setStartedAt] = useState<number | null>(null);
+  const [faceChoice, setFaceChoice] = useState<FaceChoice>("tina");
+  // The actual ElevenLabs agent ID for the selected face
+  const [liveAgentId, setLiveAgentId] = useState<string | null>(null);
+  const [envCheck, setEnvCheck] = useState<{
+    ELEVENLABS_API_KEY: boolean;
+    SIMLI_API_KEY: boolean;
+  } | null>(null);
+  const startRef = useRef<(() => void) | null>(null);
+
+  // Load session (validity check + saved transcript)
+  useEffect(() => {
+    if (!id) return;
+    fetch(`/api/agent-meeting/sessions/${id}`)
+      .then((r) => {
+        if (!r.ok) throw new Error("Session not found");
+        return r.json();
+      })
+      .then((data: { agent_id?: string; transcript?: string | null }) => {
+        setSessionStatus(data.agent_id ?? "pending");
+        // Restore previous transcript when resuming
+        if (data.transcript) {
+          try {
+            const parsed = JSON.parse(data.transcript) as TranscriptEntry[];
+            if (Array.isArray(parsed) && parsed.length > 0) setTranscript(parsed);
+          } catch { /* ignore */ }
+        }
+        setSessionError(null);
+      })
+      .catch(() => setSessionError("Session not found"));
+  }, [id]);
+
+  // Fetch the face-specific ElevenLabs agent whenever face changes (or session loads)
+  useEffect(() => {
+    if (!sessionStatus || sessionStatus === "pending") return;
+    setLiveAgentId(null);
+    fetch(`/api/agent-meeting/agent?face=${faceChoice}`, { method: "POST" })
+      .then((r) => r.ok ? r.json() : Promise.reject())
+      .then((data: { agent_id?: string }) => setLiveAgentId(data.agent_id ?? null))
+      .catch(() => setLiveAgentId(null));
+  }, [faceChoice, sessionStatus]);
+
+  useEffect(() => {
+    if (sessionStatus !== "pending") return;
+    fetch("/api/agent-meeting/env-check")
+      .then((r) => r.ok ? r.json() : null)
+      .then(setEnvCheck)
+      .catch(() => setEnvCheck(null));
+  }, [sessionStatus]);
+
+  const handleTranscript = useCallback((entries: TranscriptEntry[]) => {
+    setTranscript(entries);
+  }, []);
+
+  const handleStatusChange = useCallback((s: ConnectionStatus) => {
+    setStatus(s);
+    if (s === "connected") setStartedAt((t) => (t == null ? Date.now() : t));
+  }, []);
+
+  const handleEnd = useCallback(async () => {
+    if (!id) return;
+    const endedAt = new Date().toISOString();
+    const durationSeconds =
+      startedAt != null ? Math.round((Date.now() - startedAt) / 1000) : null;
+    try {
+      await fetch(`/api/agent-meeting/sessions/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          status: "ended",
+          ended_at: endedAt,
+          duration_seconds: durationSeconds,
+          transcript:
+            transcript.length > 0
+              ? JSON.stringify(
+                  transcript.map((e) => ({ role: e.role, text: e.text }))
+                )
+              : null,
+        }),
+      });
+    } catch {
+      // best-effort save
+    }
+    router.push("/agent-meeting");
+  }, [id, startedAt, transcript, router]);
+
+  if (!id || sessionError) {
+    return (
+      <div className="container max-w-4xl mx-auto px-6 py-12 text-center">
+        <p className="text-muted-foreground mb-4">
+          {sessionError ?? "Invalid session"}
+        </p>
+        <Button asChild variant="outline" className="font-pixel">
+          <Link href="/agent-meeting">Back to meetings</Link>
+        </Button>
+      </div>
+    );
+  }
+
+  if (!sessionStatus) {
+    return (
+      <div className="container max-w-4xl mx-auto px-6 py-12 text-center">
+        <p className="text-muted-foreground">Loading session…</p>
+      </div>
+    );
+  }
+
+  if (sessionStatus === "pending") {
+    return (
+      <div className="container max-w-4xl mx-auto px-6 py-12 space-y-6">
+        <Button variant="ghost" size="sm" asChild className="font-pixel gap-1">
+          <Link href="/agent-meeting">
+            <ArrowLeft className="size-4" aria-hidden />
+            Back
+          </Link>
+        </Button>
+        <div className="rounded-xl border border-border bg-card p-6 text-center space-y-4">
+          <h2 className="font-pixel text-lg font-medium">
+            Voice meeting requires API keys
+          </h2>
+          {envCheck && (
+            <p className="text-sm text-muted-foreground max-w-md mx-auto">
+              {!envCheck.ELEVENLABS_API_KEY && (
+                <>Server: <code className="rounded bg-muted px-1">ELEVENLABS_API_KEY</code> is not set.</>
+              )}
+              {!envCheck.ELEVENLABS_API_KEY && !envCheck.SIMLI_API_KEY && " "}
+              {!envCheck.SIMLI_API_KEY && (
+                <>Server: <code className="rounded bg-muted px-1">SIMLI_API_KEY</code> is not set.</>
+              )}
+              {envCheck.ELEVENLABS_API_KEY && envCheck.SIMLI_API_KEY && (
+                <>Keys are set on the server. Restart the dev server if you just added them, then start a new meeting.</>
+              )}
+            </p>
+          )}
+          <p className="text-sm text-muted-foreground max-w-md mx-auto">
+            Add the missing variable(s) to <code className="rounded bg-muted px-1">vaultcfo/.env.local</code> (exact names above).{" "}
+            <strong>Restart the dev server</strong> after saving — Next.js only reads env at startup. Then start a new meeting from Agent Meeting.
+          </p>
+          <Button asChild variant="outline" className="font-pixel">
+            <Link href="/agent-meeting">Back to meetings</Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container max-w-4xl mx-auto px-6 py-6 space-y-6">
+      <div className="flex items-center justify-between gap-4">
+        <Button variant="ghost" size="sm" asChild className="font-pixel gap-1">
+          <Link href="/agent-meeting">
+            <ArrowLeft className="size-4" aria-hidden />
+            Back
+          </Link>
+        </Button>
+        <span
+          className="text-xs font-pixel text-muted-foreground"
+          aria-live="polite"
+        >
+          {status === "connecting" && "Connecting…"}
+          {status === "connected" && "Live"}
+          {status === "disconnected" && "Disconnected"}
+          {status === "error" && "Error"}
+        </span>
+      </div>
+
+      {status === "disconnected" && (
+        <div className="rounded-lg border border-border bg-card p-4">
+          <p className="font-pixel text-xs text-muted-foreground mb-3">
+            Choose your consultant
+          </p>
+          <div className="flex gap-2">
+            {FACE_OPTIONS.map((key) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setFaceChoice(key)}
+                className={cn(
+                  "flex-1 rounded-lg border px-4 py-2.5 text-sm font-medium transition-colors",
+                  faceChoice === key
+                    ? "border-orange-500 bg-orange-500/10 text-orange-600 dark:text-orange-400"
+                    : "border-border bg-muted/50 text-muted-foreground hover:bg-muted"
+                )}
+                aria-pressed={faceChoice === key}
+              >
+                {SIMLI_FACE_LABELS[key]}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {liveAgentId ? (
+        <SimliAvatar
+          agentId={liveAgentId}
+          faceId={SIMLI_FACE_IDS[faceChoice]}
+          onTranscript={handleTranscript}
+          onStatusChange={handleStatusChange}
+          onEnd={handleEnd}
+          autoStart={autoStart}
+          onStartReady={(fn) => { startRef.current = fn; }}
+        />
+      ) : (
+        <div className="flex items-center justify-center h-40 text-sm text-muted-foreground">
+          Preparing consultant…
+        </div>
+      )}
+
+      <div>
+        <h2 className="font-pixel text-sm text-muted-foreground mb-2">
+          Transcript
+        </h2>
+        <MeetingTranscript
+          entries={transcript}
+          className="h-[200px] max-h-[40vh]"
+        />
+      </div>
+    </div>
+  );
+}
