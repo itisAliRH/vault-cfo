@@ -13,7 +13,7 @@ A privacy-first personal finance assistant: encrypted local vault, expense dashb
 ├─────────────────────────────────────────────────────────────────────────┤
 │  API Routes                                                              │
 │  /api/onboarding  /api/transactions  /api/contracts  /api/insights      │
-│  /api/chat        /api/vault         /api/health/perf  /api/voice/tts   │
+│  /api/chat        /api/vault         /api/health/perf  /api/voice/tts   /api/voice/stt  │
 ├─────────────────────────────────────────────────────────────────────────┤
 │  Lib: encryption (AES-256-GCM) | db (SQLite, better-sqlite3)             │
 │  Ingest: csv (papaparse), pdf (pdf-parse), contract-extract (LLM)       │
@@ -21,7 +21,7 @@ A privacy-first personal finance assistant: encrypted local vault, expense dashb
 │  Agent: models (Mistral Small 3.2), tools (getUserProfile, listTransactions…)  │
 ├─────────────────────────────────────────────────────────────────────────┤
 │  Data: ./data/vault.db (encrypted sensitive fields)                      │
-│  Inference: Mistral API (OpenAI-compatible), optional ElevenLabs TTS    │
+│  Inference: Mistral API (OpenAI-compatible); ElevenLabs: TTS + STT (voice)  │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -44,7 +44,7 @@ A privacy-first personal finance assistant: encrypted local vault, expense dashb
    - `ENCRYPTION_PASSPHRASE` — used to encrypt vault data (pick a strong passphrase).
    - `MISTRAL_API_KEY` — for Mistral inference (chat + contract extraction). Without it, chat and contract parsing will fail.
    - Optional: `MISTRAL_API_URL` — override the default `https://api.mistral.ai/v1` (e.g. `http://localhost:8000/v1` for a local/OpenAI-compatible deployment).
-   - Optional: `ELEVENLABS_API_KEY` for TTS (Settings / voice mic tooltip).
+   - Optional: `ELEVENLABS_API_KEY` for voice: TTS (Listen on assistant messages) and STT (mic button: press to talk → transcribe → send).
 
 3. **Dev server**
    ```bash
